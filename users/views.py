@@ -6,6 +6,8 @@ from .models import User
 from .models import Repository, PullRequest, Issue, Commit
 from .tasks import update_user_contributions, update_user_contributions, update_all_user_contributions
 import os
+from django.views.decorators.csrf import csrf_exempt
+
 # Create your views here.
 
 def github_required(request):
@@ -91,6 +93,7 @@ def leaderboard_view(request):
     return render(request, 'leaderboard.html', context)
 
 
+@csrf_exempt
 def update_all(request):
     # have a secret key for this POST endpoint
     if request.POST.get('API_KEY') != os.getenv('API_KEY'):
