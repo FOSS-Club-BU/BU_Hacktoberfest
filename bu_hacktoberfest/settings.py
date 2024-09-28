@@ -57,6 +57,8 @@ INSTALLED_APPS = [
 ALLAUTH_UI_THEME = "dark"
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 SOCIALACCOUNT_ONLY = True
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
