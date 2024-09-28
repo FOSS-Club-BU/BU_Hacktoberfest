@@ -30,6 +30,7 @@ SECRET_KEY = 'django-insecure-v)2-i0u-(lkguq$sh6)j@9=2h!jq=-yx&jhe27lp*4@$)p#c&#
 DEBUG = False
 
 ALLOWED_HOSTS = ["buhacktoberfest.azurewebsites.net", "localhost", "127.0.0.1", "*"]
+CSRF_TRUSTED_ORIGINS = ["https://buhacktoberfest.azurewebsites.net", "http://localhost:8000"]
 
 DEBUG_PROPAGATE_EXCEPTIONS = True
 
