@@ -32,7 +32,6 @@ def update_all_user_contributions():
     for user in users:
         try:
             github_account = SocialAccount.objects.get(user=user, provider='github')
-
             update_user_contributions(user)
         except SocialAccount.DoesNotExist:
             print(f'User {user} does not have a linked GitHub account')

@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from .models import User
 from .models import Repository, PullRequest, Issue, Commit
 from .tasks import update_user_contributions, update_user_contributions, update_all_user_contributions
-
+import os
 # Create your views here.
 
 def github_required(request):
@@ -89,3 +89,11 @@ def leaderboard_view(request):
         'leaderboard_users': leaderboard_users
     }
     return render(request, 'leaderboard.html', context)
+
+
+def update_all(request):
+    # have a secret key for this POST endpoint
+    if request.POST.get('API_KEY') != os.getenv('API_KEY'):
+        return JsonResponse({'status': 'error', 'message': 'Invalid secret key'})
+    update_all_user_contributions()
+    return JsonResponse({'status': 'success'})
