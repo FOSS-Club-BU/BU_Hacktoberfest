@@ -6,6 +6,8 @@ django-allauth==65.0.2
 django-allauth-ui==1.4.1
 django-widget-tweaks==1.5.0
 idna==3.10
+mysqlclient==2.2.4
+psycopg2-binary==2.9.9
 python-dotenv==1.0.1
 PyYAML==6.0.2
 requests==2.32.3
