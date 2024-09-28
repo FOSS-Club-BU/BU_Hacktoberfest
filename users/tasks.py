@@ -17,9 +17,7 @@ def get_headers(user):
             account__user=user, account__provider='github'
         ).token)
     return {
-        'Authorization': f'token {SocialToken.objects.get(
-            account__user=user, account__provider='github'
-        ).token}',  # Replace with your GitHub token
+        'Authorization': f'token {SocialToken.objects.get(account__user=user, account__provider='github').token}',
         'Accept': 'application/vnd.github.v3+json'
     }
 
