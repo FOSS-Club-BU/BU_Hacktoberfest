@@ -58,6 +58,7 @@ SOCIALACCOUNT_ONLY = True
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -88,6 +89,11 @@ SOCIALACCOUNT_PROVIDERS = {
     },
 }
 
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 ROOT_URLCONF = 'bu_hacktoberfest.urls'
 
@@ -121,6 +127,10 @@ AUTHENTICATION_BACKENDS = [
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+
 AUTH_USER_MODEL = 'users.User'
 
 WSGI_APPLICATION = 'bu_hacktoberfest.wsgi.application'
