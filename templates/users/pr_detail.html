@@ -1,0 +1,35 @@
+<!-- templates/pr_detail.html -->
+
+{% extends 'base.html' %}
+
+{% block title %}Pull Request Details{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-6">
+    <h2 class="text-3xl font-bold text-primary mb-4">Pull Request Details</h2>
+    <div class="card bg-gray-900 shadow-lg p-6">
+        <h3 class="text-2xl font-semibold text-primary mb-2">{{ pr.title }}</h3>
+        <p class="text-gray-300 mb-4">Repository: {{ pr.repository.name }}</p>
+        <p class="text-gray-300 mb-2">State: 
+            {% if pr.state == 'merged' %}
+                <span class="badge badge-success">Merged</span>
+            {% elif pr.state == 'closed' %}
+                <span class="badge badge-error">Closed</span>
+            {% else %}
+                <span class="badge badge-warning">{{ pr.state }}</span>
+            {% endif %}
+        </p>
+        <p class="text-gray-300 mb-2">Created At: {{ pr.created_at|date:"M d, Y H:i" }}</p>
+        {% if pr.closed_at %}
+            <p class="text-gray-300 mb-2">Closed At: {{ pr.closed_at|date:"M d, Y H:i" }}</p>
+        {% endif %}
+        {% if pr.merged_at %}
+            <p class="text-gray-300 mb-2">Merged At: {{ pr.merged_at|date:"M d, Y H:i" }}</p>
+        {% endif %}
+        <p class="text-gray-300 mb-2">Additions: {{ pr.additions }}</p>
+        <p class="text-gray-300 mb-2">Deletions: {{ pr.deletions }}</p>
+        <p class="text-gray-300 mb-4">Changed Files: {{ pr.changed_files }}</p>
+        <a href="{{ pr.url }}" target="_blank" class="btn btn-primary">View on GitHub</a>
+    </div>
+</div>
+{% endblock %}

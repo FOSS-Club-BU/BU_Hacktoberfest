@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html data-theme="night">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>{% block title %}BU Hacktoberfest{% endblock %}</title>
+        <meta name="description" content="A competition platform for GitHub contributions">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="">
+        <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            :root {
+                --primary-color: #08B64F;
+                --background-color: #1e1e1e;
+            }
+            body {
+                background-color: var(--background-color);
+            }
+            .text-primary {
+                color: var(--primary-color);
+            }
+            .bg-primary {
+                background-color: var(--primary-color);
+            }
+        </style>
+    </head>
+    <body class="bg-gradient-to-r from-[#1e1e1e] via-gray-800 to-[#1e1e1e] text-gray-100 min-h-screen">
+
+        <!-- Navbar -->
+        <nav class="navbar bg-gray-900 px-8 py-4 shadow-lg">
+            <div class="flex-1">
+                <a class="text-3xl font-bold text-primary hover:text-secondary transition duration-300" href="/">BU Hacktoberfest</a>
+            </div>
+            <div class="flex-none">
+                <ul class="menu menu-horizontal px-1">
+                    <li><a href="/" class="hover:text-primary">Home</a></li>
+                    <li><a href="/leaderboard" class="hover:text-primary">Leaderboard</a></li>
+                    <li><a href="/profile" class="hover:text-primary">Profile</a></li>
+                    <li><a href="/login" class="hover:text-primary">Login</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content Block -->
+        <main class="container mx-auto py-10 px-4">
+            {% block content %}
+            {% endblock %}
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer bg-gray-900 text-gray-300 py-4">
+            <div class="container mx-auto text-center">
+                <p>&copy; BU Hacktoberfest</p>
+            </div>
+        </footer>
+
+        <script src="" async defer></script>
+    </body>
+</html>

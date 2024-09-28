@@ -1,0 +1,41 @@
+# Python specific
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.env
+
+# Django specific
+db.sqlite3
+/media
+/staticfiles
+
+# Environment files
+.env
+*.env
+
+# Virtual environment
+venv/
+ENV/
+env/
+
+# macOS specific
+.DS_Store
+
+# pyenv
+.python-version
+
+# JetBrains IDE (PyCharm, etc.)
+.idea/
+
+# VSCode
+.vscode/
+
+# Migrations
+*/migrations/*
+
+# Celery beat schedule file
+celerybeat-schedule
+
+# Node modules (for frontend dependencies)
+node_modules/
