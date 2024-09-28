@@ -16,16 +16,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from users.views import profile, update_user_contributions_view, profile_view, pr_detail_view, update_all_user_contributions_view
-from .views import home
+from users.views import profile, profile_view, welcome_view, leaderboard_view
+from .views import home, login
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
-    path('profile/', profile_view),
-    path('profile/pr/<int:id>/', pr_detail_view, name='pr_detail'),
-    path('update_user_contributions/', update_user_contributions_view),
-    path('update_all_user_contributions/', update_all_user_contributions_view),
-    path('', home)
-
-
+    path('profile/', profile_view, name='profile'),
+    # path('profile/pr/<int:id>/', pr_detail_view, name='pr_detail'),
+    path('', home),
+    path('login/', login),
+    path('welcome/', welcome_view, name='welcome'),
+    path('leaderboard/', leaderboard_view, name='leaderboard'),
 ]

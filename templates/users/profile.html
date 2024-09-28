@@ -19,8 +19,8 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div class="card bg-gray-900 shadow-lg">
             <div class="card-body">
-                <h3 class="text-xl font-semibold text-primary">Total Commits</h3>
-                <p class="text-3xl">{{ total_commits }}</p>
+                <h3 class="text-xl font-semibold text-primary">Total points</h3>
+                <p class="text-3xl">{{ user.points }}</p>
             </div>
         </div>
         <div class="card bg-gray-900 shadow-lg">
@@ -29,12 +29,12 @@
                 <p class="text-3xl">{{ total_prs }} ({{ total_merged_prs }} Merged)</p>
             </div>
         </div>
-        <div class="card bg-gray-900 shadow-lg">
+        <!-- <div class="card bg-gray-900 shadow-lg">
             <div class="card-body">
                 <h3 class="text-xl font-semibold text-primary">Issues</h3>
                 <p class="text-3xl">{{ total_issues }} ({{ total_closed_issues }} Closed)</p>
             </div>
-        </div>
+        </div> -->
     </div>
 
     <!-- Detailed Contributions -->
@@ -85,81 +85,6 @@
             {% endif %}
         </div>
 
-        <!-- Commits Section -->
-        <div>
-            <h3 class="text-2xl font-bold text-primary mb-4">Commits</h3>
-            {% if recent_commits %}
-            <div class="overflow-x-auto">
-                <table class="table w-full bg-gray-800">
-                    <thead>
-                        <tr>
-                            <th>SHA</th>
-                            <th>Message</th>
-                            <th>Repository</th>
-                            <th>Created At</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for commit in recent_commits %}
-                        <tr>
-                            <td>{{ commit.sha|slice:":7" }}</td>
-                            <td>{{ commit.message|truncatewords:10 }}</td>
-                            <td>{{ commit.repository_name }}</td>
-                            <td>{{ commit.created_at|date:"M d, Y H:i" }}</td>
-                            <td>
-                                <a href="{{ commit.url }}" target="_blank" class="btn btn-sm btn-primary">View Commit</a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-                <p class="text-gray-300">No commits found.</p>
-            {% endif %}
-        </div>
-
-        <!-- Issues Section -->
-        <div>
-            <h3 class="text-2xl font-bold text-primary mb-4">Issues</h3>
-            {% if recent_issues %}
-            <div class="overflow-x-auto">
-                <table class="table w-full bg-gray-800">
-                    <thead>
-                        <tr>
-                            <th>Title</th>
-                            <th>Repository</th>
-                            <th>State</th>
-                            <th>Created At</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for issue in recent_issues %}
-                        <tr>
-                            <td>{{ issue.title }}</td>
-                            <td>{{ issue.repository.name }}</td>
-                            <td>
-                                {% if issue.state == 'closed' %}
-                                    <span class="badge badge-success">Closed</span>
-                                {% else %}
-                                    <span class="badge badge-warning">{{ issue.state }}</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ issue.created_at|date:"M d, Y H:i" }}</td>
-                            <td>
-                                <a href="{{ issue.url }}" target="_blank" class="btn btn-sm btn-primary">View Issue</a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-                <p class="text-gray-300">No issues found.</p>
-            {% endif %}
-        </div>
     </div>
 </div>
 {% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %} {% block content %}
+<div class="min-h-screen flex items-center justify-center">
+  <div
+    class="w-full max-w-4xl bg-neutral-900 p-8 rounded-lg shadow-lg text-white"
+  >
+    <h1 class="text-3xl font-bold mb-6 text-center">Leaderboard</h1>
+
+    <div class="overflow-x-auto">
+      <table class="table-auto w-full text-left border-collapse">
+        <thead>
+          <tr class="text-[#08B64F]">
+            <th class="px-4 py-2">Rank</th>
+            <th class="px-4 py-2">Name</th>
+            <th class="px-4 py-2">GitHub Username</th>
+            <th class="px-4 py-2">Points</th>
+            <th class="px-4 py-2">Pull Requests Merged</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in leaderboard_users %}
+          <tr
+            class="{% if forloop.counter0|divisibleby:2 %}bg-neutral-800{% else %}bg-neutral-700{% endif %}"
+          >
+            <td class="px-4 py-2">{{ forloop.counter }}</td>
+            <td class="px-4 py-2">{{ user.first_name }} {{ user.last_name }}</td>
+            <td class="px-4 py-2">{{ user.get_profile_username }}</td>
+            <td class="px-4 py-2">{{ user.points }}</td>
+            <td class="px-4 py-2">{{ user.total_merged_prs }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

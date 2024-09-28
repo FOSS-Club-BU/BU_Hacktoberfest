@@ -1,0 +1,16 @@
+{% extends "account/login.html" %}
+{% load i18n %}
+{% load allauth_ui %}
+{% load widget_tweaks %}
+{% block content %}
+    {% trans "Sign Up/Sign In" as heading %}
+    {% #container heading=heading  %}
+    {% if LOGIN_BY_CODE_ENABLED %}
+        <div class="divider divider-neutral"></div>
+        <a href="{{ request_login_code_url }}" class="btn btn-neutral">{% trans "Mail me a sign-in code" %}</a>
+    {% endif %}
+    {% if SOCIALACCOUNT_ENABLED %}
+        {% include "socialaccount/snippets/login.html" with page_layout="entrance" %}
+    {% endif %}
+    {% /container %}
+{% endblock content %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load socialaccount %}
+
+
+{% block content %}
+<div class="flex items-center justify-center my-48">
+    <div class="w-full max-w-sm bg-neutral-900 p-6 rounded-lg shadow-lg">
+        <h2 class="text-center text-2xl font-semibold text-white mb-8">Sign In</h2>
+
+        <!-- Microsoft Login Button -->
+        <a href="{% provider_login_url 'microsoft' %}" class="flex items-center justify-center bg-[#08B64F] text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition-colors duration-300 ease-in-out">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" viewBox="0 0 48 48" fill="currentColor">
+                <path fill="#F25022" d="M6 6h18v18H6z"/>
+                <path fill="#00A4EF" d="M24 6h18v18H24z"/>
+                <path fill="#7FBA00" d="M6 24h18v18H6z"/>
+                <path fill="#FFB900" d="M24 24h18v18H24z"/>
+            </svg>
+            Login with Microsoft
+        </a>
+    </div>
+</div>
+{% endblock %}

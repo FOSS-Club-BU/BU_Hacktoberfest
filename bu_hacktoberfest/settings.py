@@ -41,13 +41,20 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "allauth_ui",
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.github',
     'allauth.socialaccount.providers.microsoft',
     'users',
+    "widget_tweaks",
+    "slippers",
 ]
+
+ALLAUTH_UI_THEME = "dark"
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+SOCIALACCOUNT_ONLY = True
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -102,12 +109,18 @@ TEMPLATES = [
     },
 ]
 
+LOGIN_REDIRECT_URL = '/profile'  # Redirect after successful login
+LOGOUT_REDIRECT_URL = '/'  # Redirect after logout
+
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 
 ]
 
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 AUTH_USER_MODEL = 'users.User'
 
 WSGI_APPLICATION = 'bu_hacktoberfest.wsgi.application'

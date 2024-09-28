@@ -1,21 +1,28 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Welcome{% endblock %}
 
 {% block content %}
-<div class="hero min-h-screen bg-base-200">
+<div class="hero my-32">
     <div class="hero-content text-center">
+        
         <div class="max-w-md">
+            <div class="py-6 px-4 bg-white/30 rounded-xl my-8">
+                <img src="{% static 'FOSS_BU_H.png' %}" alt="" class="">
+            </div>
             <h1 class="text-5xl font-bold text-primary">Welcome to BU Hacktoberfest</h1>
             <p class="py-6 text-gray-200">
-                Participate in our GitHub competition by contributing to repositories and climbing the leaderboard!
+                Participate in our month long open source fest by contributing to repositories and climbing the leaderboard!
             </p>
-            <a href="/signup" class="btn bg-primary text-white hover:bg-secondary btn-lg">Get Started</a>
+            <a href="/accounts/login/" class="btn bg-primary text-white hover:bg-[#08b64f]/80 btn-lg">Get Started</a>
+
+
         </div>
     </div>
 </div>
 
-<div class="py-10" style="background-color: #1e1e1e;">
+<div class="py-10">
     <h2 class="text-4xl font-bold text-center text-primary py-4">How It Works</h2>
     <div class="flex justify-center">
         <div class="grid grid-cols-1 gap-6 md:grid-cols-3">

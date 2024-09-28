@@ -11,7 +11,7 @@
         <script src="https://cdn.tailwindcss.com"></script>
         <style>
             :root {
-                --primary-color: #08B64F;
+                --primary-color: #08b64f;
                 --background-color: #1e1e1e;
             }
             body {
@@ -25,10 +25,10 @@
             }
         </style>
     </head>
-    <body class="bg-gradient-to-r from-[#1e1e1e] via-gray-800 to-[#1e1e1e] text-gray-100 min-h-screen">
+    <body class="bg-gradient-to-r from-[#1e1e1e] via-[#07B64F]/30 to-[#1e1e1e] text-gray-100 min-h-screen">
 
         <!-- Navbar -->
-        <nav class="navbar bg-gray-900 px-8 py-4 shadow-lg">
+        <nav class="navbar bg-gray-900 px-8 py-4 shadow-lg top-0 left-0 fixed z-50">
             <div class="flex-1">
                 <a class="text-3xl font-bold text-primary hover:text-secondary transition duration-300" href="/">BU Hacktoberfest</a>
             </div>
@@ -43,7 +43,7 @@
         </nav>
 
         <!-- Main Content Block -->
-        <main class="container mx-auto py-10 px-4">
+        <main class="container mx-auto py-10 px-4 min-h-screen mt-16">
             {% block content %}
             {% endblock %}
         </main>

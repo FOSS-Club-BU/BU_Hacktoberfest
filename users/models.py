@@ -28,6 +28,9 @@ class User(AbstractUser):
     def total_closed_prs(self):
         return self.pull_requests.filter(state='closed').count()
     
+    def total_merged_prs(self):
+        return self.pull_requests.filter(state='merged').count()
+    
     def get_profile_username(self):
         # get github username from social account
         social_account = SocialAccount.objects.get(user=self, provider='github')
