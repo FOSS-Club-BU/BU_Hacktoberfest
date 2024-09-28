@@ -1,0 +1,16 @@
+asgiref==3.8.1
+certifi==2024.8.30
+charset-normalizer==3.3.2
+Django==5.1.1
+django-allauth==65.0.2
+django-allauth-ui==1.4.1
+django-widget-tweaks==1.5.0
+idna==3.10
+python-dotenv==1.0.1
+PyYAML==6.0.2
+requests==2.32.3
+slippers==0.6.2
+sqlparse==0.5.1
+typeguard==2.13.3
+typing_extensions==4.12.2
+urllib3==2.2.3
