@@ -100,3 +100,14 @@ def update_all(request):
         return JsonResponse({'status': 'error', 'message': 'Invalid secret key'})
     update_all_user_contributions()
     return JsonResponse({'status': 'success'})
+
+
+def redirect_view(request):
+    return redirect('profile')
+
+def repositories_view(request):
+    repositories = Repository.objects.filter(is_active=True)  # Fetch active repositories
+    context = {
+        'repositories': repositories
+    }
+    return render(request, 'repositories.html', context)
