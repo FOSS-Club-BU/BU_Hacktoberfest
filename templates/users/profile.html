@@ -12,10 +12,10 @@
         <div>
             <h2 class="text-3xl font-bold text-primary">{{ user.first_name }} {{ user.last_name }} ({{ user.username }})</h2>
             <p class="text-gray-300">GitHub: <a href="https://github.com/{{ user.get_profile_username }}" class="text-primary hover:underline" target="_blank">{{ user.get_profile_username }}</a></p>
+            <!-- last updated at -->
+            <p class="text-gray-300">Last updated: {{ user.updated_at|date:"M d, Y H:i" }}</p>
         </div>
     </div>
-
-    <!-- Statistics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div class="card bg-gray-900 shadow-lg">
             <div class="card-body">

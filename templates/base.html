@@ -9,6 +9,9 @@
         <link rel="stylesheet" href="">
         <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
         <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
         <style>
             :root {
                 --primary-color: #08b64f;
@@ -16,6 +19,7 @@
             }
             body {
                 background-color: var(--background-color);
+                font: 1rem 'Inter', sans-serif;
             }
             .text-primary {
                 color: var(--primary-color);
@@ -34,10 +38,14 @@
             </div>
             <div class="flex-none">
                 <ul class="menu menu-horizontal px-1">
-                    <li><a href="/" class="hover:text-primary">Home</a></li>
-                    <li><a href="/leaderboard" class="hover:text-primary">Leaderboard</a></li>
-                    <li><a href="/profile" class="hover:text-primary">Profile</a></li>
-                    <li><a href="/login" class="hover:text-primary">Login</a></li>
+                    <li><a href="/" class="hover:text-[#07B64F]">Home</a></li>
+                    <li><a href="/leaderboard" class="hover:text-[#07B64F]">Leaderboard</a></li>
+                    <li><a href="/profile" class="hover:text-[#07B64F]">Profile</a></li>
+                    {% if user.is_authenticated %}
+                    <li><a href="/accounts/logout/" class="hover:text-red-400">Logout</a></li>
+                    {% else %}
+                    <li><a href="/login" class="hover:text-[#07B64F]">Login</a></li>
+                    {% endif %}
                 </ul>
             </div>
         </nav>
