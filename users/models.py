@@ -37,12 +37,31 @@ class User(AbstractUser):
         return social_account.extra_data.get('login')
 
 class Repository(models.Model):
+    DIFFICULTY_CHOICES = [
+        ('easy', 'Easy'),
+        ('medium', 'Medium'),
+        ('hard', 'Hard'),
+    ]
+    
     name = models.CharField(max_length=100)
     url = models.URLField()
-    is_active = models.BooleanField(default=True)  # Can deactivate repos if needed
+    is_active = models.BooleanField(default=True)  
+    description = models.TextField(null=True, blank=True)
+    maintainer_username = models.CharField(max_length=39, null=True, blank=True)
+    difficulty = models.CharField(max_length=10, choices=DIFFICULTY_CHOICES, default='medium')
+    tech_stack = models.TextField(null=True, blank=True) 
+    club = models.CharField(max_length=50, null=True, blank=True)
 
     def __str__(self):
         return self.name
+    
+    # Return the tech stack as a list
+    def get_tech_stack(self):
+        return [tech.strip() for tech in self.tech_stack.split(',') if tech.strip()]
+
+    # plural name for admin panel
+    class Meta:
+        verbose_name_plural = 'Repositories'
 
 
 class PullRequest(models.Model):

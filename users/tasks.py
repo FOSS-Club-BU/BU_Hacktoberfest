@@ -112,7 +112,11 @@ def update_global_pull_requests(user):
                 )
 
                 
-    update_points(user, total_points)
+        update_points(user, total_points)
+
+    else:
+        print(f'Failed to fetch PRs for user {user}: {response.json()}')
+        
 
 def update_global_issues(user):
     response = requests.get(f'{GITHUB_API_URL}/search/issues?q=author:{user.github_username}+type:issue', headers=get_headers(user))
