@@ -32,21 +32,30 @@
     <body class="bg-gradient-to-r from-[#1e1e1e] via-[#07B64F]/30 to-[#1e1e1e] text-gray-100 min-h-screen">
 
         <!-- Navbar -->
-        <nav class="navbar bg-gray-900 px-8 py-4 shadow-lg top-0 left-0 fixed z-50">
-            <div class="flex-1">
-                <a class="text-3xl font-bold text-primary hover:text-secondary transition duration-300" href="/">BU Hacktoberfest</a>
-            </div>
-            <div class="flex-none">
-                <ul class="menu menu-horizontal px-1">
-                    <li><a href="/" class="hover:text-[#07B64F]">Home</a></li>
-                    <li><a href="/leaderboard" class="hover:text-[#07B64F]">Leaderboard</a></li>
-                    <li><a href="/profile" class="hover:text-[#07B64F]">Profile</a></li>
-                    {% if user.is_authenticated %}
-                    <li><a href="/accounts/logout/" class="hover:text-red-400">Logout</a></li>
-                    {% else %}
-                    <li><a href="/login" class="hover:text-[#07B64F]">Login</a></li>
-                    {% endif %}
-                </ul>
+        <nav class="navbar bg-gray-900 px-8 py-4 shadow-lg top-0 left-0 fixed z-50 w-full">
+            <div class="lg:flex flex-col lg:flex-row w-full justify-between">
+                <div class="flex justify-between items-center w-full lg:w-auto">
+                    <a class="text-3xl font-bold text-primary hover:text-secondary transition duration-300" href="/">BU Hacktoberfest</a>
+                    <!-- Hamburger button for small screens -->
+                    <button id="menu-toggle" class="text-white block lg:hidden focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0 0 50 50" class="stroke-white fill-white">
+                        <path d="M 0 7.5 L 0 12.5 L 50 12.5 L 50 7.5 Z M 0 22.5 L 0 27.5 L 50 27.5 L 50 22.5 Z M 0 37.5 L 0 42.5 L 50 42.5 L 50 37.5 Z"></path>
+                        </svg>
+                    </button>
+                </div>
+                <!-- Links for larger screens -->
+                <div id="menu" class="hidden lg:inline lg:items-center lg:w-auto w-full mt-4 lg:mt-0">
+                    <ul class="menu menu-vertical lg:flex lg:flex-row lg:w-full text-center">
+                        <li><a href="/" class="hover:text-[#07B64F]">Home</a></li>
+                        <li><a href="/leaderboard" class="hover:text-[#07B64F]">Leaderboard</a></li>
+                        <li><a href="/profile" class="hover:text-[#07B64F]">Profile</a></li>
+                        {% if user.is_authenticated %}
+                        <li><a href="/accounts/logout/" class="hover:text-red-400">Logout</a></li>
+                        {% else %}
+                        <li><a href="/login" class="hover:text-[#07B64F]">Login</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
             </div>
         </nav>
 
@@ -63,6 +72,16 @@
             </div>
         </footer>
 
-        <script src="" async defer></script>
+        <script>
+            // Toggle menu on small screens
+            document.getElementById('menu-toggle').addEventListener('click', function() {
+                var menu = document.getElementById('menu');
+                if (menu.classList.contains('hidden')) {
+                    menu.classList.remove('hidden');
+                } else {
+                    menu.classList.add('hidden');
+                }
+            });
+        </script>
     </body>
 </html>
