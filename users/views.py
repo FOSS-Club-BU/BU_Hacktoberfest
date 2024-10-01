@@ -7,7 +7,8 @@ from .models import Repository, PullRequest, Issue, Commit
 from .tasks import update_user_contributions, update_user_contributions, update_all_user_contributions
 import os
 from django.views.decorators.csrf import csrf_exempt
-
+from django.utils import timezone
+from datetime import timedelta, datetime
 # Create your views here.
 
 def github_required(request):
@@ -84,14 +85,19 @@ def welcome_view(request):
 #     return render(request, 'users/pr_detail.html', context)
 
 
+LEADERBOARD_REVEALED = os.getenv('LEADERBOARD_REVEALED', False)
+
 def leaderboard_view(request):
-    leaderboard_users = User.objects.filter(is_staff=False).order_by('-points')[:10]  # Top 10 users
-
-    context = {
-        'leaderboard_users': leaderboard_users
-    }
-    return render(request, 'leaderboard.html', context)
-
+    if LEADERBOARD_REVEALED==False:
+        return render(request, 'leaderboard_not_available.html', {
+            'reveal_date': "8th October, 2024"
+        })
+    else:
+        # You can pull leaderboard data here and pass it to the leaderboard page
+        users = User.objects.all().order_by('-points')  # Example: sort by points
+        return render(request, 'leaderboard.html', {
+            'users': users
+        })
 
 @csrf_exempt
 def update_all(request):
