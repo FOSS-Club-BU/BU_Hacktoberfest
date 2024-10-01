@@ -45,3 +45,7 @@ def faq_view(request):
     ]
 
     return render(request, 'faq.html', {'faqs': faqs})
+
+
+def resources_view(request):    
+    return render(request, 'resources.html')
