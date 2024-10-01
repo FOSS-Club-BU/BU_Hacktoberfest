@@ -9,7 +9,7 @@ from allauth.socialaccount.models import SocialAccount
 
 
 GITHUB_API_URL = 'https://api.github.com'
-START_DATE = datetime(2024, 8, 1)  # Start tracking from October 1, 2024
+START_DATE = datetime(2024, 10, 1)  # Start tracking from October 1, 2024
 END_DATE = datetime(2024, 10, 31)   # End tracking on October 31, 2024
 
 def get_headers(user):
@@ -116,7 +116,7 @@ def update_global_pull_requests(user):
 
     else:
         print(f'Failed to fetch PRs for user {user}: {response.json()}')
-        
+
 
 def update_global_issues(user):
     response = requests.get(f'{GITHUB_API_URL}/search/issues?q=author:{user.github_username}+type:issue', headers=get_headers(user))
