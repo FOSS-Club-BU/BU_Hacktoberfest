@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from users.views import profile, profile_view, welcome_view, leaderboard_view, update_all, redirect_view, repositories_view
-from .views import home, login
+from .views import home, login, faq_view
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/3rdparty/', redirect_view, name='redirect'),
@@ -29,4 +29,6 @@ urlpatterns = [
     path('leaderboard/', leaderboard_view, name='leaderboard'),
     path('update_all/', update_all, name='update_all'),
     path('repositories/', repositories_view, name='repositories'),
+    path('faq/', faq_view, name='faq'),
+
 ]
