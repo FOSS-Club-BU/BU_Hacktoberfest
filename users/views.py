@@ -51,7 +51,7 @@ def profile_view(request):
     total_issues = user.issues.count()
     total_closed_issues = user.issues.filter(state='closed').count()
     total_open_issues = user.issues.filter(state='open').count()
-    recent_prs = user.pull_requests.order_by('-created_at')[:10]
+    recent_prs = user.pull_requests.filter(is_competition_repo=True).order_by('-created_at')
     recent_commits = user.commits.order_by('-created_at')[:10]
     recent_issues = user.issues.order_by('-created_at')[:10]
     context = {
