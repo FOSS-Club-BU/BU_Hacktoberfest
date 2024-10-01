@@ -62,7 +62,11 @@
                         {% for pr in recent_prs %}
                         <tr>
                             <td>{{ pr.title }}</td>
+                            {% if pr.repository %}
                             <td>{{ pr.repository.name }}</td>
+                            {% else %}
+                            <td class="pr_repo_url">{{ pr.url }}</td>
+                            {% endif %}
                             <td>{{ pr.points }}</td>
                             <td>
                                 {% if pr.state == 'merged' %}
@@ -89,4 +93,12 @@
 
     </div>
 </div>
+<script>
+    const prRepoUrls = document.getElementsByClassName('pr_repo_url');
+    for (let i = 0; i < prRepoUrls.length; i++) {
+        const url = prRepoUrls[i].innerText;
+        prRepoUrls[i].innerHTML = url.replace('https://github.com/', '').split('/pull')[0];
+
+    }
+</script>
 {% endblock %}
