@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class=" flex justify-center py-10">
+<div class="flex justify-center py-10">
     <div class="container mx-auto">
         <h1 class="text-3xl font-bold text-center mb-8 text-[#08B64F]">Active Repositories</h1>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -24,7 +24,6 @@
                     </span>
                 </div>
 
-                
                 <div class="flex flex-wrap gap-2 mb-4">
                     {% for tech in repo.get_tech_stack %}
                     <span class="inline-block bg-[#08B64F] text-neutral-900 py-1 px-2 rounded-full text-xs font-semibold">
@@ -34,7 +33,6 @@
                 </div>
 
                 <div class="flex justify-evenly lg:justify-between items-center mb-4 space-x-4">
-                    <!-- Updated Go to Repository Button with GitHub Icon -->
                     <a href="{{ repo.url }}" class="bg-[#08B64F] flex items-center px-2 py-1 rounded-xl hover:bg-[#08B64F]/80" target="_blank">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 .297C5.37.297 0 5.67 0 12.297c0 5.294 3.438 9.787 8.207 11.387.6.111.793-.258.793-.576 0-.284-.011-1.04-.017-2.04-3.338.727-4.042-1.615-4.042-1.615-.546-1.387-1.333-1.756-1.333-1.756-1.09-.744.083-.729.083-.729 1.205.084 1.838 1.237 1.838 1.237 1.07 1.834 2.808 1.304 3.493.997.107-.774.42-1.304.763-1.604-2.665-.303-5.467-1.332-5.467-5.93 0-1.31.47-2.382 1.237-3.222-.123-.304-.536-1.523.117-3.176 0 0 1.008-.322 3.3 1.23.957-.266 1.983-.399 3.004-.405 1.02.006 2.047.139 3.005.405 2.29-1.552 3.297-1.23 3.297-1.23.655 1.653.242 2.872.119 3.176.77.84 1.237 1.912 1.237 3.222 0 4.61-2.805 5.624-5.476 5.92.43.37.823 1.1.823 2.219 0 1.605-.014 2.896-.014 3.289 0 .322.192.693.799.575C20.565 22.08 24 17.589 24 12.297 24 5.67 18.627.297 12 .297z"/>
@@ -42,7 +40,6 @@
                         Go to Repository
                     </a>
 
-                    <!-- Maintainer GitHub Profile Link -->
                     <p class="text-sm text-neutral-400">
                         Maintained by: 
                         <a href="https://github.com/{{ repo.maintainer_username }}" class="text-white hover:underline" target="_blank">
@@ -50,17 +47,21 @@
                         </a>
                     </p>
                 </div>
-                
+
                 {% if not repo.is_active %}
                 <p class="text-red-500">This repository is currently inactive</p>
                 {% endif %}
             </div>
             {% endfor %}
-
-            <!-- submit your repo -->
-
         </div>
-        <div class="flex justify-center mt-5">
+
+        <!-- 'More repos coming soon' message -->
+        <div class="text-center mt-10">
+            <p class="text-xl font-semibold text-neutral-400">More repositories coming soon!</p>
+        </div>
+
+        <!-- Submit your repo section -->
+        <div class="flex justify-center mt-10">
             <div class="bg-neutral-900 text-white p-6 rounded-lg shadow-lg border-2 border-[#08B64F] max-w-lg">
                 <h2 class="text-2xl font-semibold mb-2 text-[#08B64F]">Submit Your Repository</h2>
                 <p class="text-sm text-neutral-400 mb-4">Have a project you want to showcase? Submit your repository to be featured on the platform.</p>
@@ -70,7 +71,8 @@
                     </svg>
                     Submit Your Repository
                 </a>
-                </div>
+            </div>
         </div>
+    </div>
 </div>
 {% endblock %}
