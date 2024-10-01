@@ -24,9 +24,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-v)2-i0u-(lkguq$sh6)j@9=2h!jq=-yx&jhe27lp*4@$)p#c&#'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
 ALLOWED_HOSTS = ["buhacktoberfest.azurewebsites.net", "localhost", "127.0.0.1", "*", "hacktoberfest.fossbu.co"]
@@ -57,7 +56,7 @@ INSTALLED_APPS = [
 ALLAUTH_UI_THEME = "dark"
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 SOCIALACCOUNT_ONLY = True
-ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+# ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
 
 
 MIDDLEWARE = [
