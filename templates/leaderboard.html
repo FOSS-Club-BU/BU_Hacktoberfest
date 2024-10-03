@@ -1,36 +1,106 @@
-{% extends "base.html" %} {% block content %}
-<div class="min-h-screen flex items-center justify-center">
-  <div
-    class="w-full max-w-4xl bg-neutral-900 p-8 rounded-lg shadow-lg text-white"
-  >
-    <h1 class="text-3xl font-bold mb-6 text-center">Leaderboard</h1>
+{% extends "base.html" %}
 
-    <div class="overflow-x-auto">
-      <table class="table-auto w-full text-left border-collapse">
-        <thead>
-          <tr class="text-[#08B64F]">
-            <th class="px-4 py-2">Rank</th>
-            <th class="px-4 py-2">Name</th>
-            <th class="px-4 py-2">GitHub Username</th>
-            <th class="px-4 py-2">Points</th>
-            <th class="px-4 py-2">Pull Requests Merged</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for user in leaderboard_users %}
-          <tr
-            class="{% if forloop.counter0|divisibleby:2 %}bg-neutral-800{% else %}bg-neutral-700{% endif %}"
-          >
-            <td class="px-4 py-2">{{ forloop.counter }}</td>
-            <td class="px-4 py-2">{{ user.first_name }} {{ user.last_name }}</td>
-            <td class="px-4 py-2">{{ user.get_profile_username }}</td>
-            <td class="px-4 py-2">{{ user.points }}</td>
-            <td class="px-4 py-2">{{ user.total_merged_prs }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+{% block content %}
+<div class="min-h-screen flex flex-col items-center">
+    <div id="leaderboard-container" class="w-full max-w-4xl bg-neutral-900 p-8 rounded-lg shadow-lg text-white">
+        <h1 class="text-3xl font-bold mb-6 text-center">Leaderboard</h1>
+        
+        <div id="loading-state" class="text-center hidden">
+            <p>Loading...</p>
+        </div>
+
+        <div id="error-state" class="text-center hidden">
+            <p class="text-red-500">Error loading leaderboard data. Please try again later.</p>
+        </div>
+
+        <div id="leaderboard-table-container" class="overflow-x-auto">
+            <table class="table-auto w-full text-left border-collapse hidden" id="leaderboard-table">
+                <thead>
+                    <tr class="text-[#08B64F]">
+                        <th class="px-4 py-2">Rank</th>
+                        <th class="px-4 py-2">Name</th>
+                        <th class="px-4 py-2">GitHub Username</th>
+                        <th class="px-4 py-2">Points</th>
+                        <th class="px-4 py-2">Pull Requests Merged</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    <!-- Data will be populated via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div id="pagination-controls" class="mt-6 flex justify-between">
+            <button id="prev-page-btn" class="bg-[#08B64F] px-4 py-2 rounded-xl hover:bg-[#08B64F]/80" disabled>Previous</button>
+            <button id="next-page-btn" class="bg-[#08B64F] px-4 py-2 rounded-xl hover:bg-[#08B64F]/80" disabled>Next</button>
+        </div>
     </div>
-  </div>
 </div>
+
+<script>
+    let currentPage = 1;
+
+    // Function to show/hide loading and error states
+    function toggleLoading(show) {
+        document.getElementById('loading-state').classList.toggle('hidden', !show);
+        document.getElementById('leaderboard-table').classList.toggle('hidden', show);
+        document.getElementById('error-state').classList.add('hidden');
+    }
+
+    function showError() {
+        document.getElementById('loading-state').classList.add('hidden');
+        document.getElementById('leaderboard-table').classList.add('hidden');
+        document.getElementById('error-state').classList.remove('hidden');
+    }
+
+    // Function to fetch leaderboard data
+    async function fetchLeaderboard(page) {
+        toggleLoading(true);
+        try {
+            const response = await fetch(`/api/leaderboard?page=${page}`);
+            if (!response.ok) throw new Error('Failed to load data');
+            const data = await response.json();
+            populateLeaderboard(data);
+            toggleLoading(false);
+        } catch (error) {
+            showError();
+        }
+    }
+
+    // Function to populate leaderboard table
+    function populateLeaderboard(data) {
+        const leaderboardBody = document.getElementById('leaderboard-body');
+        leaderboardBody.innerHTML = ''; // Clear previous rows
+
+        data.users.forEach(user => {
+            const row = document.createElement('tr');
+            row.classList.add('bg-neutral-800', 'hover:bg-neutral-700');
+            row.innerHTML = `
+                <td class="px-4 py-2">${user.rank}</td>
+                <td class="px-4 py-2">${user.first_name} ${user.last_name}</td>
+                <td class="px-4 py-2"><a class="hover:underline hover:scale-105" target="_blank" href="https://github.com/${user.github_username}">${user.github_username}</a></td>
+                <td class="px-4 py-2">${user.points}</td>
+                <td class="px-4 py-2">${user.total_merged_prs}</td>
+            `;
+            leaderboardBody.appendChild(row);
+        });
+
+        // Handle pagination controls
+        document.getElementById('prev-page-btn').disabled = !data.has_previous;
+        document.getElementById('next-page-btn').disabled = !data.has_next;
+        currentPage = data.has_next ? data.next_page_number : currentPage;
+    }
+
+    // Pagination controls
+    document.getElementById('prev-page-btn').addEventListener('click', () => {
+        if (currentPage > 1) fetchLeaderboard(--currentPage);
+    });
+
+    document.getElementById('next-page-btn').addEventListener('click', () => {
+        fetchLeaderboard(++currentPage);
+    });
+
+    // Initial data load
+    fetchLeaderboard(currentPage);
+</script>
 {% endblock %}

@@ -77,6 +77,13 @@ def update_global_pull_requests(user):
             if START_DATE <= created_at <= END_DATE:
                 repo_url = pr_data['html_url'].split('/pull')[0]
                 is_competition_repo = repo_url in active_urls
+                # repo is also a competition repo if the number of stars is greater than 200
+                if not is_competition_repo:
+                    response = requests.get(f'{GITHUB_API_URL}/repos/{repo_url}', headers=get_headers(user))
+                    if response.status_code == 200:
+                        repo_data = response.json()
+                        if repo_data['stargazers_count'] > 200:
+                            is_competition_repo = True
 
                 # Default points
                 points = 1
