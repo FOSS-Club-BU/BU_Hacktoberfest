@@ -28,8 +28,14 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 DEBUG = False
 
-ALLOWED_HOSTS = ["buhacktoberfest.azurewebsites.net", "localhost", "127.0.0.1", "*", "hacktoberfest.fossbu.co"]
-CSRF_TRUSTED_ORIGINS = ["https://buhacktoberfest.azurewebsites.net", "http://localhost:8000", "https://hacktoberfest.fossbu.co"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "hacktoberfest.fossbu.co"]
+CSRF_TRUSTED_ORIGINS = ["http://localhost:8000", "https://hacktoberfest.fossbu.co"]
+
+ADDITIONAL_HOSTS = os.getenv("ADDITIONAL_HOSTS")
+if ADDITIONAL_HOSTS:
+    ALLOWED_HOSTS += ADDITIONAL_HOSTS.split(",")
+    for host in ADDITIONAL_HOSTS.split(","):
+        CSRF_TRUSTED_ORIGINS.append(f"https://{host}")
 
 DEBUG_PROPAGATE_EXCEPTIONS = True
 
