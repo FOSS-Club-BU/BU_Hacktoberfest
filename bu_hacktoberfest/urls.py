@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from users.views import profile, profile_view, welcome_view, leaderboard_view, update_all, redirect_view, repositories_view
+from users.views import profile, profile_view, welcome_view, leaderboard_view, update_all, redirect_view, repositories_view, leaderboard_api_view
 from .views import home, login, faq_view, resources_view
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -31,5 +31,6 @@ urlpatterns = [
     path('repositories/', repositories_view, name='repositories'),
     path('faq/', faq_view, name='faq'),
     path('resources/', resources_view, name='resources'),
+    path('api/leaderboard', leaderboard_api_view, name='leaderboard_api'),
 
 ]

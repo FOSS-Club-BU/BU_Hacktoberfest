@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.core.paginator import Paginator
 from django.http import JsonResponse
 
 from django.contrib.auth.decorators import login_required
@@ -88,16 +89,41 @@ def welcome_view(request):
 LEADERBOARD_REVEALED = os.getenv('LEADERBOARD_REVEALED', False)
 
 def leaderboard_view(request):
-    if LEADERBOARD_REVEALED==False:
+    if LEADERBOARD_REVEALED or request.user.is_staff:
+        return render(request, 'leaderboard.html')
+    else:
         return render(request, 'leaderboard_not_available.html', {
             'reveal_date': "8th October, 2024"
         })
+    
+def leaderboard_api_view(request):
+    if LEADERBOARD_REVEALED or request.user.is_staff:
+        page_number = request.GET.get('page', 1)
+        users_query = User.objects.filter(socialaccount__provider='github').order_by('-points')
+        
+        paginator = Paginator(users_query, 10)
+        page_obj = paginator.get_page(page_number)
+
+        data = {
+            'users': [{
+                'rank': (page_obj.start_index() + i),
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'github_username': user.get_profile_username(),  # Ensure it is called or serialized
+                'points': user.points,
+                'total_merged_prs': user.total_merged_prs()
+            } for i, user in enumerate(page_obj)],
+            'has_previous': page_obj.has_previous(),
+            'has_next': page_obj.has_next(),
+            'previous_page_number': page_obj.previous_page_number() if page_obj.has_previous() else None,
+            'next_page_number': page_obj.next_page_number() if page_obj.has_next() else None
+        }
+
+        return JsonResponse(data, safe=False)
+    
     else:
-        # You can pull leaderboard data here and pass it to the leaderboard page
-        users = User.objects.all().order_by('-points')  # Example: sort by points
-        return render(request, 'leaderboard.html', {
-            'users': users
-        })
+        return JsonResponse({'message': 'Leaderboard not available yet'}, status=403)
+
 
 @csrf_exempt
 def update_all(request):
