@@ -86,20 +86,17 @@ def update_global_pull_requests(user):
                             is_competition_repo = True
 
                 # Default points
-                points = 1
+                points = 1 if is_competition_repo else 0
                 labels = [label['name'] for label in pr_data['labels']]
 
-                # Check if any label matches the point system
                 for label in labels:
                     if label in LABEL_POINTS:
                         points = LABEL_POINTS[label]
-                        break  # Assign points based on the highest priority label
+                        break
 
-                # Update user's total points for the PR
-                if pr_state == 'merged':
+                if pr_state == 'merged' and is_competition_repo:
                     total_points += points
 
-                # Save the PR data to the database
                 PullRequest.objects.update_or_create(
                     user=user,
                     url=pr_data['html_url'],
@@ -123,7 +120,6 @@ def update_global_pull_requests(user):
 
     else:
         print(f'Failed to fetch PRs for user {user}: {response.json()}')
-
 
 def update_global_issues(user):
     response = requests.get(f'{GITHUB_API_URL}/search/issues?q=author:{user.github_username}+type:issue', headers=get_headers(user))
