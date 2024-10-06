@@ -23,6 +23,7 @@ if os.getenv("SENTRY_DSN"):
         dsn=os.getenv("SENTRY_DSN"),
         traces_sample_rate=1.0,
         profiles_sample_rate=1.0,
+        environment=os.getenv("SENTRY_ENVIRONMENT", "development"),
     )
 
 
