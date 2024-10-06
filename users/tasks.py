@@ -85,6 +85,13 @@ def update_global_pull_requests(user):
                         if repo_data['stargazers_count'] > 200:
                             is_competition_repo = True
 
+                else:
+                    print(f'Checking if user {user} is eligible for repo {repo_url}')
+                    repo = Repository.objects.get(url=repo_url)
+                    if repo.usernames_not_eligible:
+                        if user.get_profile_username() in repo.usernames_not_eligible.split(','):
+                            is_competition_repo = False
+
                 # Default points
                 points = 1 if is_competition_repo else 0
                 labels = [label['name'] for label in pr_data['labels']]

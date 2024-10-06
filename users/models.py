@@ -35,6 +35,11 @@ class User(AbstractUser):
         # get github username from social account
         social_account = SocialAccount.objects.get(user=self, provider='github')
         return social_account.extra_data.get('login')
+    
+    # change string representation of the model
+    def __str__(self):
+        return self.first_name + ' ' + self.last_name if self.first_name else self.username
+
 
 class Repository(models.Model):
     DIFFICULTY_CHOICES = [
@@ -51,6 +56,7 @@ class Repository(models.Model):
     difficulty = models.CharField(max_length=10, choices=DIFFICULTY_CHOICES, default='medium')
     tech_stack = models.TextField(null=True, blank=True) 
     club = models.CharField(max_length=50, null=True, blank=True)
+    usernames_not_eligible = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return self.name
