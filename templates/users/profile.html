@@ -10,7 +10,7 @@
     <div class="flex items-center space-x-6 mb-8">
         <img src="https://avatars.githubusercontent.com/{{ user.get_profile_username }}" alt="{{ user.username }}'s avatar" class="w-24 h-24 rounded-full border-4 border-primary">
         <div>
-            <h2 class="text-3xl font-bold text-primary">{{ user.first_name }} {{ user.last_name }} ({{ user.username }})</h2>
+            <h2 class="text-3xl font-bold text-primary">{{ user.first_name }} ({{ user.username }})</h2>
             <p class="text-gray-300">GitHub: <a href="https://github.com/{{ user.get_profile_username }}" class="text-primary hover:underline" target="_blank">{{ user.get_profile_username }}</a></p>
             <!-- last updated at -->
              {% if user.last_updated %}
