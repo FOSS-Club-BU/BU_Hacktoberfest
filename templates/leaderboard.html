@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="min-h-screen flex flex-col items-center">
-    <div id="leaderboard-container" class="w-full max-w-4xl bg-neutral-900 p-8 rounded-lg shadow-lg text-white">
+    <div id="leaderboard-container" class="w-full max-w-6xl bg-neutral-900 p-8 rounded-lg shadow-lg text-white">
         <h1 class="text-3xl font-bold mb-6 text-center">Leaderboard</h1>
         
         <div id="loading-state" class="text-center hidden">
@@ -31,8 +31,8 @@
         </div>
 
         <div id="pagination-controls" class="mt-6 flex justify-between">
-            <button id="prev-page-btn" class="bg-[#08B64F] px-4 py-2 rounded-xl hover:bg-[#08B64F]/80" disabled>Previous</button>
-            <button id="next-page-btn" class="bg-[#08B64F] px-4 py-2 rounded-xl hover:bg-[#08B64F]/80" disabled>Next</button>
+            <button id="prev-page-btn" class="bg-[#08B64F] px-4 py-2 rounded-xl hover:bg-[#08B64F]/80 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>Previous</button>
+            <button id="next-page-btn" class="bg-[#08B64F] px-4 py-2 rounded-xl hover:bg-[#08B64F]/80 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>Next</button>
         </div>
     </div>
 </div>
@@ -88,19 +88,23 @@
         // Handle pagination controls
         document.getElementById('prev-page-btn').disabled = !data.has_previous;
         document.getElementById('next-page-btn').disabled = !data.has_next;
-        currentPage = data.has_next ? data.next_page_number : currentPage;
     }
 
     // Pagination controls
     document.getElementById('prev-page-btn').addEventListener('click', () => {
-        if (currentPage > 1) fetchLeaderboard(--currentPage);
+        if (currentPage > 1) {
+            currentPage--;
+            fetchLeaderboard(currentPage);
+        }
     });
 
     document.getElementById('next-page-btn').addEventListener('click', () => {
-        fetchLeaderboard(++currentPage);
+        currentPage++;
+        fetchLeaderboard(currentPage);
     });
 
     // Initial data load
     fetchLeaderboard(currentPage);
 </script>
+
 {% endblock %}
