@@ -38,7 +38,7 @@ class User(AbstractUser):
     
     # change string representation of the model
     def __str__(self):
-        return self.first_name + ' ' + self.last_name if self.first_name else self.username
+        return self.first_name if self.first_name else self.username
 
 
 class Repository(models.Model):
