@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex justify-center">
+    <div class="max-w-3xl w-full bg-neutral-800 p-8 rounded-lg shadow-lg text-white">
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center space-x-4">
+                <img src="{{ user_data.profile_pic }}" alt="Profile Picture" class="w-20 h-20 rounded-full">
+                <div>
+                    <h1 class="text-3xl font-bold">{{ user_data.name }}</h1>
+                    <p class="text-neutral-400">{{ user_data.bio }}</p>
+                    <a href="{{ user_data.github_link }}" target="_blank" class="text-[#08B64F] hover:underline">
+                        GitHub: {{ user_data.github_username }}
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <h2 class="text-2xl font-semibold text-[#08B64F]">Stats</h2>
+            <ul class="mt-4 space-y-2">
+                <li class="text-neutral-300">Points: <span class="text-white">{{ user_data.points }}</span></li>
+                <li class="text-neutral-300">Pull Requests Merged: <span class="text-white">{{ user_data.total_merged_prs }}</span></li>
+            </ul>
+        </div>
+
+        <div class="mb-6">
+            <h2 class="text-2xl font-semibold text-[#08B64F]">Pull Requests</h2>
+            <div class="mt-4 space-y-4">
+                {% if user_data.pull_requests %}
+                    {% for pr in user_data.pull_requests %}
+                        <div class="bg-neutral-700 p-4 rounded-lg {% if pr.state == 'merged' %}{% if pr.is_competition_repo %} border-2 border-[#08B64F]{% endif %}{% endif %}">
+                            <a href="{{ pr.url }}" target="_blank" class="text-[#08B64F] font-semibold hover:underline">
+                                {{ pr.title }}
+                            </a>
+                            <p class="text-sm text-neutral-400">
+                                Status: 
+                                <span class="text-white">{{ pr.state }}</span> |
+                                Created: {{ pr.created_at|date:"M d, Y" }}
+                                {% if pr.state == 'merged' %}
+                                    | Merged: {{ pr.closed_at|date:"M d, Y" }}
+                                {% endif %}
+                            </p>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-neutral-400">No pull requests found.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mt-6">
+            <a href="{{ user_data.github_link }}" class="bg-[#08B64F] text-black px-4 py-2 rounded-lg hover:bg-[#08B64F]/80">
+                View GitHub Profile
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
