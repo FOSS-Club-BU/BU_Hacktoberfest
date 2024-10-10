@@ -13,7 +13,7 @@
             <p class="text-red-500">Error loading leaderboard data. Please try again later.</p>
         </div>
 
-        <div id="leaderboard-table-container" class="overflow-x-auto">
+        <div id="leaderboard-table-container" class="overflow-x-auto lg:overflow-x-visible">
             <table class="table-auto w-full text-left border-collapse hidden" id="leaderboard-table">
                 <thead>
                     <tr class="text-[#08B64F]">
@@ -40,7 +40,6 @@
 <script>
     let currentPage = 1;
 
-    // Function to show/hide loading and error states
     function toggleLoading(show) {
         document.getElementById('loading-state').classList.toggle('hidden', !show);
         document.getElementById('leaderboard-table').classList.toggle('hidden', show);
@@ -55,33 +54,50 @@
 
     // Function to fetch leaderboard data
     async function fetchLeaderboard(page) {
-        toggleLoading(true);
-        try {
-            const response = await fetch(`/api/leaderboard?page=${page}`);
-            if (!response.ok) throw new Error('Failed to load data');
-            const data = await response.json();
-            populateLeaderboard(data);
+        const cachedData = sessionStorage.getItem(`leaderboardPage-${page}`);
+        // print(cachedData);
+        if (cachedData) {
+            populateLeaderboard(JSON.parse(cachedData));
             toggleLoading(false);
-        } catch (error) {
-            showError();
+        } else {
+            toggleLoading(true);
+            try {
+                const response = await fetch(`/api/leaderboard?page=${page}`);
+                if (!response.ok) throw new Error('Failed to load data');
+                const data = await response.json();
+                sessionStorage.setItem(`leaderboardPage-${page}`, JSON.stringify(data));
+                populateLeaderboard(data);
+                toggleLoading(false);
+            } catch (error) {
+                showError();
+            }
         }
     }
 
     // Function to populate leaderboard table
     function populateLeaderboard(data) {
         const leaderboardBody = document.getElementById('leaderboard-body');
+        leaderboardBody.classList.add('px-4', 'py-2', 'mx-16');
         leaderboardBody.innerHTML = ''; // Clear previous rows
 
         data.users.forEach(user => {
+            console.log(user);
             const row = document.createElement('tr');
-            row.classList.add('bg-neutral-800', 'hover:bg-neutral-700');
+            row.classList.add('bg-neutral-800', 'hover:bg-[#07B64F]/30', 'hover:scale-105', 'transition-all', 'cursor-pointer', 'ease-in-out', 'duration-300');
             row.innerHTML = `
                 <td class="px-4 py-2">${user.rank}</td>
                 <td class="px-4 py-2">${user.first_name}</td>
-                <td class="px-4 py-2"><a class="hover:underline hover:scale-105" target="_blank" href="https://github.com/${user.github_username}">${user.github_username}</a></td>
+                <td class="px-4 py-2">
+                    <a href="https://github.com/${user.github_username}" target="_blank" class="hover:underline">
+                        ${user.github_username}
+                    </a>
+                </td>
                 <td class="px-4 py-2">${user.points}</td>
                 <td class="px-4 py-2">${user.total_merged_prs}</td>
             `;
+            row.addEventListener('click', () => {
+                window.location.href = `/profile/${user.id}`;
+            });
             leaderboardBody.appendChild(row);
         });
 
@@ -103,8 +119,15 @@
         fetchLeaderboard(currentPage);
     });
 
-    // Initial data load
+    // clear session storage when the page is loaded of only leaderboard page
+    all_cache = Object.keys(sessionStorage);
+    for (let i = 0; i < all_cache.length; i++) {
+        if (all_cache[i].includes('leaderboardPage')) {
+            sessionStorage.removeItem(all_cache[i]);
+        }
+    }
     fetchLeaderboard(currentPage);
+
 </script>
 
 {% endblock %}

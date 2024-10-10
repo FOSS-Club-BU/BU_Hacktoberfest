@@ -109,9 +109,10 @@ def leaderboard_api_view(request):
                 'rank': (page_obj.start_index() + i),
                 'first_name': user.first_name,
                 'last_name': user.last_name,
-                'github_username': user.get_profile_username(),  # Ensure it is called or serialized
+                'github_username': user.get_profile_username(),
                 'points': user.points,
-                'total_merged_prs': user.total_merged_prs()
+                'total_merged_prs': user.total_merged_prs(),
+                'id': user.username
             } for i, user in enumerate(page_obj)],
             'has_previous': page_obj.has_previous(),
             'has_next': page_obj.has_next(),
@@ -143,3 +144,18 @@ def repositories_view(request):
         'repositories': repositories
     }
     return render(request, 'repositories.html', context)
+
+
+def public_profile_view(request, username):
+    user = get_object_or_404(User, username=username)
+    pull_requests = PullRequest.objects.filter(user=user).order_by('-created_at')
+    data = {
+        'name': f"{user.first_name} {user.last_name}",
+        'github_username': user.get_profile_username(),  
+        'points': user.points,
+        'total_merged_prs': user.total_merged_prs,
+        'profile_pic': "https://avatars.githubusercontent.com/"+user.get_profile_username(),
+        'github_link': f"https://github.com/{user.get_profile_username()}",
+        'pull_requests': pull_requests
+    }
+    return render(request, 'users/public_profile.html', {'user_data': data})
