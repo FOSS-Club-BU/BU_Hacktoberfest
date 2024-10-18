@@ -37,16 +37,9 @@ def update_all_user_contributions():
             print(f'User {user} does not have a linked GitHub account')
 
 def update_user_contributions(user):
-    # repositories = Repository.objects.filter(is_active=True)
-    
-    # Update competition-specific contributions
-    # for repo in repositories:
-    #     update_competition_pull_requests(user, repo)
-    #     update_competition_issues(user, repo)
 
-    # Update global contributions (PRs/issues not tied to specific competition repositories)
     update_global_pull_requests(user)
-    update_global_issues(user)
+    # update_global_issues(user)
 
     user.last_updated = timezone.now()
     user.save()
@@ -68,6 +61,7 @@ def update_global_pull_requests(user):
         total_points = 0
 
         for pr_data in prs:
+            print(f'Processing PR {pr_data["html_url"]}')
             pr_state = pr_data['state']
             if pr_state == 'closed' and pr_data['pull_request'].get('merged_at'):
                 pr_state = 'merged'
@@ -77,16 +71,14 @@ def update_global_pull_requests(user):
             if START_DATE <= created_at <= END_DATE:
                 repo_url = pr_data['html_url'].split('/pull')[0]
                 is_competition_repo = repo_url in active_urls
-                # repo is also a competition repo if the number of stars is greater than 200
                 if not is_competition_repo:
-                    response = requests.get(f'{GITHUB_API_URL}/repos/{repo_url}', headers=get_headers(user))
+                    response = requests.get(f'{GITHUB_API_URL}/repos/{repo_url.replace('https://github.com/','')}', headers=get_headers(user))
                     if response.status_code == 200:
                         repo_data = response.json()
                         if repo_data['stargazers_count'] > 200:
                             is_competition_repo = True
 
                 else:
-                    print(f'Checking if user {user} is eligible for repo {repo_url}')
                     repo = Repository.objects.get(url=repo_url)
                     if repo.usernames_not_eligible:
                         if user.get_profile_username() in repo.usernames_not_eligible.split(','):
