@@ -30,6 +30,7 @@ def update_points(user, points):
 def update_all_user_contributions():
     users = User.objects.all()
     for user in users:
+        print(f'Processing user {user}')
         try:
             github_account = SocialAccount.objects.get(user=user, provider='github')
             update_user_contributions(user)
@@ -73,6 +74,7 @@ def update_global_pull_requests(user):
                 is_competition_repo = repo_url in active_urls
                 if not is_competition_repo:
                     response = requests.get(f"{GITHUB_API_URL}/repos/{repo_url.replace('https://github.com/','')}", headers=get_headers(user))
+                    # print(response)
                     if response.status_code == 200:
                         repo_data = response.json()
                         if repo_data['stargazers_count'] > 200:
