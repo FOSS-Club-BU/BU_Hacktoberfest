@@ -77,8 +77,11 @@ def update_global_pull_requests(user):
                     # print(response)
                     if response.status_code == 200:
                         repo_data = response.json()
+                        print("Stars count: ", repo_data['stargazers_count'])
                         if repo_data['stargazers_count'] > 200:
                             is_competition_repo = True
+                    else:
+                        print(f'Failed to fetch repo data for {repo_url}: {response.json()}')
 
                 else:
                     repo = Repository.objects.get(url=repo_url)
