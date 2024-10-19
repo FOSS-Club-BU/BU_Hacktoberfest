@@ -72,7 +72,7 @@ def update_global_pull_requests(user):
                 repo_url = pr_data['html_url'].split('/pull')[0]
                 is_competition_repo = repo_url in active_urls
                 if not is_competition_repo:
-                    response = requests.get(f'{GITHUB_API_URL}/repos/{repo_url.replace('https://github.com/','')}', headers=get_headers(user))
+                    response = requests.get(f"{GITHUB_API_URL}/repos/{repo_url.replace('https://github.com/','')}", headers=get_headers(user))
                     if response.status_code == 200:
                         repo_data = response.json()
                         if repo_data['stargazers_count'] > 200:
