@@ -1,15 +1,14 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.core.paginator import Paginator
 from django.http import JsonResponse
-
+from django.db.models import Count, Prefetch, Max, Q, Min
+from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth.decorators import login_required
 from .models import User
 from .models import Repository, PullRequest, Issue, Commit
 from .tasks import update_user_contributions, update_user_contributions, update_all_user_contributions
 import os
 from django.views.decorators.csrf import csrf_exempt
-from django.utils import timezone
-from datetime import timedelta, datetime
+
 # Create your views here.
 
 def github_required(request):
@@ -95,29 +94,34 @@ def leaderboard_view(request):
         return render(request, 'leaderboard_not_available.html', {
             'reveal_date': "8th October, 2024"
         })
-    
+
 def leaderboard_api_view(request):
     if LEADERBOARD_REVEALED or request.user.is_staff:
-        page_number = request.GET.get('page', 1)
-        users_query = User.objects.filter(socialaccount__provider='github').order_by('-points')
-        
-        paginator = Paginator(users_query, 10)
-        page_obj = paginator.get_page(page_number)
+        social_accounts = SocialAccount.objects.filter(provider='github')
 
+        users_query = (
+            User.objects.filter(socialaccount__provider='github')
+            .prefetch_related(Prefetch('socialaccount_set', queryset=social_accounts, to_attr='social_data'))
+            .annotate(
+                total_merged_prs=Count('pull_requests', filter=Q(pull_requests__state='merged')),
+                last_merged_pr=Max('pull_requests__closed_at', filter=Q(pull_requests__state='merged'))
+            )
+            .order_by('-points', 'last_merged_pr')
+        )
+
+        for i in users_query[:10]:
+            print(f"{i.first_name} {i.last_name} {i.total_merged_prs} {i.last_merged_pr}")
+        
         data = {
             'users': [{
-                'rank': (page_obj.start_index() + i),
+                'rank': (i + 1),
                 'first_name': user.first_name,
                 'last_name': user.last_name,
-                'github_username': user.get_profile_username(),
+                'github_username': user.social_data[0].extra_data.get('login') if user.social_data else '',
                 'points': user.points,
-                'total_merged_prs': user.total_merged_prs(),
+                'total_merged_prs': user.total_merged_prs,
                 'id': user.username
-            } for i, user in enumerate(page_obj)],
-            'has_previous': page_obj.has_previous(),
-            'has_next': page_obj.has_next(),
-            'previous_page_number': page_obj.previous_page_number() if page_obj.has_previous() else None,
-            'next_page_number': page_obj.next_page_number() if page_obj.has_next() else None
+            } for i, user in enumerate(users_query)]
         }
 
         return JsonResponse(data, safe=False)
