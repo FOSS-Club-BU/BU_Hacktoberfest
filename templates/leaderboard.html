@@ -39,6 +39,8 @@
 
 <script>
     let currentPage = 1;
+    const pageSize = 10;
+    let leaderboardData = [];
 
     function toggleLoading(show) {
         document.getElementById('loading-state').classList.toggle('hidden', !show);
@@ -53,25 +55,32 @@
     }
 
     // Function to fetch leaderboard data
-    async function fetchLeaderboard(page) {
-        const cachedData = sessionStorage.getItem(`leaderboardPage-${page}`);
-        // print(cachedData);
-        if (cachedData) {
-            populateLeaderboard(JSON.parse(cachedData));
+    async function fetchLeaderboard() {
+        console.log('Fetching leaderboard data...');
+        toggleLoading(true);
+
+        try {
+            const response = await fetch(`/api/leaderboard`);
+            if (!response.ok) throw new Error('Failed to load data');
+            const data = await response.json();
+            leaderboardData = data.users;
+            displayPage(currentPage);
             toggleLoading(false);
-        } else {
-            toggleLoading(true);
-            try {
-                const response = await fetch(`/api/leaderboard?page=${page}`);
-                if (!response.ok) throw new Error('Failed to load data');
-                const data = await response.json();
-                sessionStorage.setItem(`leaderboardPage-${page}`, JSON.stringify(data));
-                populateLeaderboard(data);
-                toggleLoading(false);
-            } catch (error) {
-                showError();
-            }
+        } catch (error) {
+            showError();
         }
+    }
+
+    // Function to display a specific page of leaderboard data
+    function displayPage(page) {
+        const start = (page - 1) * pageSize;
+        const end = start + pageSize;
+        const paginatedData = leaderboardData.slice(start, end);
+        populateLeaderboard(paginatedData);
+
+        // Handle pagination controls
+        document.getElementById('prev-page-btn').disabled = page === 1;
+        document.getElementById('next-page-btn').disabled = end >= leaderboardData.length;
     }
 
     // Function to populate leaderboard table
@@ -80,8 +89,7 @@
         leaderboardBody.classList.add('px-4', 'py-2', 'mx-16');
         leaderboardBody.innerHTML = ''; // Clear previous rows
 
-        data.users.forEach(user => {
-            console.log(user);
+        data.forEach(user => {
             const row = document.createElement('tr');
             row.classList.add('bg-neutral-800', 'hover:bg-[#07B64F]/30', 'hover:scale-105', 'transition-all', 'cursor-pointer', 'ease-in-out', 'duration-300');
             row.innerHTML = `
@@ -100,34 +108,32 @@
             });
             leaderboardBody.appendChild(row);
         });
-
-        // Handle pagination controls
-        document.getElementById('prev-page-btn').disabled = !data.has_previous;
-        document.getElementById('next-page-btn').disabled = !data.has_next;
     }
 
     // Pagination controls
     document.getElementById('prev-page-btn').addEventListener('click', () => {
         if (currentPage > 1) {
             currentPage--;
-            fetchLeaderboard(currentPage);
+            displayPage(currentPage);
         }
     });
 
     document.getElementById('next-page-btn').addEventListener('click', () => {
-        currentPage++;
-        fetchLeaderboard(currentPage);
+        if ((currentPage * pageSize) < leaderboardData.length) {
+            currentPage++;
+            displayPage(currentPage);
+        }
     });
 
-    // clear session storage when the page is loaded of only leaderboard page
-    all_cache = Object.keys(sessionStorage);
-    for (let i = 0; i < all_cache.length; i++) {
-        if (all_cache[i].includes('leaderboardPage')) {
-            sessionStorage.removeItem(all_cache[i]);
-        }
-    }
-    fetchLeaderboard(currentPage);
-
+    // Fetch leaderboard data when the page loads
+    // const cachedData = sessionStorage.getItem('leaderboardData');
+    // if (cachedData) {
+        // leaderboardData = JSON.parse(cachedData);
+        // displayPage(currentPage);
+    // } else {
+    fetchLeaderboard();
+    // }
 </script>
+
 
 {% endblock %}
