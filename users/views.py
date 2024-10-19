@@ -128,7 +128,6 @@ def leaderboard_api_view(request):
 
 @csrf_exempt
 def update_all(request):
-    # have a secret key for this POST endpoint
     if request.POST.get('API_KEY') != os.getenv('API_KEY'):
         return JsonResponse({'status': 'error', 'message': 'Invalid secret key'})
     update_all_user_contributions()
