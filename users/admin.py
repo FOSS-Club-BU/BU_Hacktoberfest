@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Repository, PullRequest, Issue
+from .models import User, Repository, PullRequest, Issue, BlackListedRepository
 from django.contrib import admin
 
 # Register your models here.
@@ -23,9 +23,14 @@ class UserAdmin(admin.ModelAdmin):
 class RepositoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'url', 'difficulty' ,'club', 'tech_stack')
 
+
+class BlackListedRepositoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'url')
+
 admin.site.register(User, UserAdmin)
 admin.site.register(Repository, RepositoryAdmin)
 admin.site.register(PullRequest, PullRequestAdmin)
+admin.site.register(BlackListedRepository, BlackListedRepositoryAdmin)
 admin.site.register(Issue)
 
 

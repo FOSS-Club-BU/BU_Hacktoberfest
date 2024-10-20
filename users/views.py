@@ -108,9 +108,6 @@ def leaderboard_api_view(request):
             )
             .order_by('-points', 'last_merged_pr')
         )
-
-        for i in users_query[:10]:
-            print(f"{i.first_name} {i.last_name} {i.total_merged_prs} {i.last_merged_pr}")
         
         data = {
             'users': [{

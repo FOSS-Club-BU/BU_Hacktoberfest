@@ -2,7 +2,7 @@ import requests
 from datetime import datetime
 from django.utils import timezone
 # from celery import shared_task
-from .models import User, PullRequest, Issue, Repository
+from .models import User, PullRequest, Issue, Repository, BlackListedRepository
 # import allauth
 from allauth.socialaccount.models import SocialLogin, SocialToken, SocialApp
 from allauth.socialaccount.models import SocialAccount
@@ -55,6 +55,8 @@ def update_global_pull_requests(user):
     active_urls = Repository.objects.filter(is_active=True).values_list('url', flat=True)
     active_urls = list(active_urls)
 
+    blacklisted_repos = BlackListedRepository.objects.all().values_list('url', flat=True)
+
     response = requests.get(f'{GITHUB_API_URL}/search/issues?q=author:{user.socialaccount_set.get(provider="github").extra_data["login"]}+type:pr&sort=created&per_page=100', headers=get_headers(user))
     
     if response.status_code == 200:
@@ -73,15 +75,18 @@ def update_global_pull_requests(user):
                 repo_url = pr_data['html_url'].split('/pull')[0]
                 is_competition_repo = repo_url in active_urls
                 if not is_competition_repo:
-                    response = requests.get(f"{GITHUB_API_URL}/repos/{repo_url.replace('https://github.com/','')}", headers=get_headers(user))
-                    # print(response)
-                    if response.status_code == 200:
-                        repo_data = response.json()
-                        print("Stars count: ", repo_data['stargazers_count'])
-                        if repo_data['stargazers_count'] > 200:
-                            is_competition_repo = True
+                    if repo_url in blacklisted_repos:
+                        is_competition_repo = False
                     else:
-                        print(f'Failed to fetch repo data for {repo_url}: {response.json()}')
+                        response = requests.get(f"{GITHUB_API_URL}/repos/{repo_url.replace('https://github.com/','')}", headers=get_headers(user))
+                        # print(response)
+                        if response.status_code == 200:
+                            repo_data = response.json()
+                            print("Stars count: ", repo_data['stargazers_count'])
+                            if repo_data['stargazers_count'] > 200:
+                                is_competition_repo = True
+                        else:
+                            print(f'Failed to fetch repo data for {repo_url}: {response.json()}')
 
                 else:
                     repo = Repository.objects.get(url=repo_url)
