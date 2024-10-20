@@ -114,3 +114,9 @@ class Commit(models.Model):
     repository_name = models.CharField(max_length=100)
 
 
+class BlackListedRepository(models.Model):
+    name = models.CharField(max_length=100)
+    url = models.URLField()
+
+    class Meta:
+        verbose_name_plural = 'Blacklisted Repositories'
