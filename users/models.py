@@ -22,6 +22,8 @@ class StarredRepository(models.Model):
     stars = models.IntegerField()
     stars_text = models.CharField(max_length=20, default='0')
     last_updated = models.DateTimeField(auto_now=True)
+    total_prs_count = models.IntegerField(default=0)
+    merged_prs_count = models.IntegerField(default=0)
 
     class Meta:
         verbose_name = 'Starred Repository'
@@ -31,13 +33,20 @@ class StarredRepository(models.Model):
     def __str__(self):
         return f"{self.full_name} ({self.stars} stars)"
 
+    def update_pr_counts(self):
+        # Get all PRs for this repository
+        prs = PullRequest.objects.filter(url__startswith=self.url)
+        self.total_prs_count = prs.count()
+        self.merged_prs_count = prs.filter(state='merged').count()
+        self.save()
+
     @property
     def total_prs(self):
-        return PullRequest.objects.filter(url__startswith=self.url).count()
+        return self.total_prs_count
 
     @property
     def merged_prs(self):
-        return PullRequest.objects.filter(url__startswith=self.url, state='merged').count()
+        return self.merged_prs_count
 
 class DailyStats(models.Model):
     date = models.DateField()
