@@ -14,7 +14,7 @@ from django.utils import timezone
 from datetime import timedelta
 
 def update_starred_repositories():
-    temp_l=[]
+    temp_l = []
     for pr in PullRequest.objects.filter(is_competition_repo=True, state='merged'):
         repo_url = pr.url.split('/pull')[0]
         print(repo_url)
@@ -26,14 +26,14 @@ def update_starred_repositories():
                 headers={
                     'Authorization': f"token {os.getenv('GITHUB_API_TOKEN')}",
                     'Accept': 'application/vnd.github.v3+json'
-                    }
+                }
             )
             print(repo_url + " " + str(response.status_code))
             if response.status_code == 200:
                 repo_data = response.json()
                 print(repo_data['stargazers_count'])
                 if repo_data['stargazers_count'] >= 200:
-                    StarredRepository.objects.update_or_create(
+                    repo, created = StarredRepository.objects.update_or_create(
                         url=repo_url,
                         defaults={
                             'name': repo_data['name'],
@@ -42,6 +42,7 @@ def update_starred_repositories():
                             'stars_text': f"{repo_data['stargazers_count']/1000:.1f}k"
                         }
                     )
+                    repo.update_pr_counts()
             temp_l.append(repo_url)
         except Exception as e:
             print(f"Error fetching repo data: {e}")
@@ -51,6 +52,16 @@ def github_required(request):
 
 def event_ended_view(request):
     return render(request, 'event_ended.html')
+
+def assign_pull_request_to_top_repo(pr):
+    # top_repos = TopRepository.objects.all()
+    # pr_state = pr.state
+    print(pr.url)
+    repository = Repository.objects.filter(url__startswith=pr.url.split('/pull')[0]).first()
+    pr.repository = repository
+    pr.save()
+
+
 
 def generate_stats():
     stats = HacktoberfestStats.objects.create(
@@ -77,11 +88,11 @@ def generate_stats():
         )
 
     # Repository stats
-    hacktoberfest_repos = Repository.objects.annotate(
-        total_prs=Count('pull_requests'),
-        merged_prs=Count('pull_requests', filter=Q(pull_requests__state='merged')),
+    hacktoberfest_repos = Repository.objects.filter(is_active=True).annotate(
+        total_prs=Count('pull_requests', distinct=True),
+        merged_prs=Count('pull_requests', filter=Q(pull_requests__state='merged'), distinct=True),
         unique_contributors=Count('pull_requests__user', distinct=True)
-    )
+    ).order_by('-merged_prs')
 
 
     for repo in hacktoberfest_repos:
@@ -94,7 +105,7 @@ def generate_stats():
         )
 
     # Update starred repositories
-    update_starred_repositories()
+    # update_starred_repositories()
 
     # Daily stats
     daily_prs = PullRequest.objects.annotate(
@@ -111,24 +122,18 @@ def generate_stats():
     return stats
 
 def stats_view(request):
-    stats = HacktoberfestStats.objects.last()
-    # stats = generate_stats()
-    if not stats:
-        stats = generate_stats()
+    # stats = HacktoberfestStats.objects.last()
+    # if not stats:
+    stats = generate_stats()
 
-    last_updated = StarredRepository.objects.aggregate(last_update=Max('last_updated'))['last_update']
-    if not last_updated:
-        update_starred_repositories()
-
+    # last_updated = StarredRepository.objects.aggregate(last_update=Max('last_updated'))['last_update']
     hacktoberfest_repos = Repository.objects.filter(is_active=True).annotate(
-        total_prs=Count('pull_requests'),
-        merged_prs=Count('pull_requests', filter=Q(pull_requests__state='merged')),
+        total_prs=Count('pull_requests', distinct=True),
+        merged_prs=Count('pull_requests', filter=Q(pull_requests__state='merged'), distinct=True),
         unique_contributors=Count('pull_requests__user', distinct=True)
     ).order_by('-merged_prs')
 
-    # Get starred repositories from database
-    starred_repos = StarredRepository.objects.all()
-
+    starred_repos = StarredRepository.objects.all().order_by('-stars')
     daily_stats = DailyStats.objects.all().order_by('date')
     top_contributors = TopContributor.objects.filter(stats=stats).order_by('rank')
 
