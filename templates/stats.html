@@ -2,25 +2,33 @@
 
 {% block content %}
 <div class="container mx-auto px-4 py-8">
-    <h1 class="text-4xl font-bold text-primary mb-8 text-center">Hacktoberfest 2024 Statistics</h1>
+    <h1 class="text-4xl font-bold text-primary mb-8 text-center">BU Hacktoberfest 2024 Statistics</h1>
 
     <!-- Overview Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
-            <h3 class="text-xl font-semibold text-primary mb-2">Total Participants</h3>
-            <p class="text-3xl font-bold">{{ stats.total_participants }}</p>
-        </div>
-        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
             <h3 class="text-xl font-semibold text-primary mb-2">Total PRs</h3>
             <p class="text-3xl font-bold">{{ stats.total_prs }}</p>
+        </div>
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h3 class="text-xl font-semibold text-primary mb-2">Total PRs in Eligible Repos</h3>
+            <p class="text-3xl font-bold">{{ stats.total_prs_in_competition_repos }}</p>
         </div>
         <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
             <h3 class="text-xl font-semibold text-primary mb-2">Merged PRs</h3>
             <p class="text-3xl font-bold">{{ stats.total_merged_prs }}</p>
         </div>
         <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h3 class="text-xl font-semibold text-primary mb-2">Merged PRs in Eligible Repos</h3>
+            <p class="text-3xl font-bold">{{ stats.total_merged_prs_in_competition_repos }}</p>
+        </div>
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
             <h3 class="text-xl font-semibold text-primary mb-2">Completion Rate</h3>
             <p class="text-3xl font-bold">{{ stats.completion_rate|floatformat:1 }}%</p>
+        </div>
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h3 class="text-xl font-semibold text-primary mb-2">Total Participants</h3>
+            <p class="text-3xl font-bold">{{ stats.total_participants }}</p>
         </div>
     </div>
 
