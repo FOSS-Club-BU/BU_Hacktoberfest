@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center">
+    <div class="max-w-md w-full bg-gray-800 p-8 rounded-lg shadow-lg">
+        <h1 class="text-3xl font-bold text-primary mb-6 text-center">Hacktoberfest 2024 Has Ended</h1>
+        
+        <p class="text-gray-300 mb-8 text-center">
+            Thank you for your interest! The event has concluded. Check back next year for Hacktoberfest 2025.
+        </p>
+
+        <div class="mt-8 text-center">
+            <a href="/stats" class="bg-primary text-white py-2 px-4 rounded-md hover:bg-primary/80 transition duration-200">
+                View Event Statistics
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

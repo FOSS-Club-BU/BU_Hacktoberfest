@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold text-primary mb-8 text-center">Hacktoberfest 2024 Statistics</h1>
+
+    <!-- Overview Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h3 class="text-xl font-semibold text-primary mb-2">Total Participants</h3>
+            <p class="text-3xl font-bold">{{ stats.total_participants }}</p>
+        </div>
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h3 class="text-xl font-semibold text-primary mb-2">Total PRs</h3>
+            <p class="text-3xl font-bold">{{ stats.total_prs }}</p>
+        </div>
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h3 class="text-xl font-semibold text-primary mb-2">Merged PRs</h3>
+            <p class="text-3xl font-bold">{{ stats.total_merged_prs }}</p>
+        </div>
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h3 class="text-xl font-semibold text-primary mb-2">Completion Rate</h3>
+            <p class="text-3xl font-bold">{{ stats.completion_rate|floatformat:1 }}%</p>
+        </div>
+    </div>
+
+    <!-- Repository Statistics -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        <!-- Hacktoberfest Eligible Repositories -->
+        <div class="bg-gray-800 rounded-lg shadow-lg p-6">
+            <h2 class="text-2xl font-bold text-primary mb-6">BU Hacktoberfest Repositories</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gray-900">
+                            <th class="px-4 py-2 text-left">Repository</th>
+                            <th class="px-4 py-2 text-left">PRs</th>
+                            <th class="px-4 py-2 text-left">Merged</th>
+                            <th class="px-4 py-2 text-left">Contributors</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for repo in hacktoberfest_repos %}
+                        <tr class="border-t border-gray-700">
+                            <td class="px-4 py-2">
+                                <a href="{{ repo.url }}" class="text-primary hover:underline" target="_blank">
+                                    {{ repo.name }}
+                                </a>
+                            </td>
+                            <td class="px-4 py-2">{{ repo.total_prs }}</td>
+                            <td class="px-4 py-2">{{ repo.merged_prs }}</td>
+                            <td class="px-4 py-2">{{ repo.unique_contributors }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Popular Repositories (Most Stars) -->
+        <div class="bg-gray-800 rounded-lg shadow-lg p-6">
+            <h2 class="text-2xl font-bold text-primary mb-6">Global Repos</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gray-900">
+                            <th class="px-4 py-2 text-left">Repository</th>
+                            <th class="px-4 py-2 text-left">Stars</th>
+                            <th class="px-4 py-2 text-left">PRs</th>
+                            <th class="px-4 py-2 text-left">Merged</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for repo in starred_repos %}
+                        <tr class="border-t border-gray-700">
+                            <td class="px-4 py-2">
+                                <a href="{{ repo.url }}" class="text-primary hover:underline" target="_blank">
+                                    {{ repo.full_name }}
+                                </a>
+                            </td>
+                            <td class="px-4 py-2">{{ repo.stars_text }}+</td>
+                            <td class="px-4 py-2">{{ repo.total_prs }}</td>
+                            <td class="px-4 py-2">{{ repo.merged_prs }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Contributors -->
+    <div class="mb-12">
+        <h2 class="text-2xl font-bold text-primary mb-6">Top Contributors</h2>
+        <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+            <table class="w-full">
+                <thead>
+                    <tr class="bg-gray-900">
+                        <th class="px-6 py-3 text-left">Rank</th>
+                        <th class="px-6 py-3 text-left">User</th>
+                        <th class="px-6 py-3 text-left">Points</th>
+                        <th class="px-6 py-3 text-left">Merged PRs</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for contributor in top_contributors %}
+                    <tr class="border-t border-gray-700">
+                        <td class="px-6 py-4">#{{ contributor.rank }}</td>
+                        <td class="px-6 py-4">
+                            <a href="/profile/{{ contributor.user.username }}" class="text-primary hover:underline">
+                                {{ contributor.user.first_name }}
+                            </a>
+                        </td>
+                        <td class="px-6 py-4">{{ contributor.points }}</td>
+                        <td class="px-6 py-4">{{ contributor.merged_prs }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Contribution Trends -->
+    <div>
+        <h2 class="text-2xl font-bold text-primary mb-6">Daily Contribution Trends</h2>
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <canvas id="contributionChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('contributionChart').getContext('2d');
+    const data = {
+        labels: [{% for stat in daily_stats %}'{{ stat.date|date:"M d" }}',{% endfor %}],
+        datasets: [{
+            label: 'Pull Requests',
+            data: [{% for stat in daily_stats %}{{ stat.pr_count }},{% endfor %}],
+            borderColor: '#08b64f',
+            tension: 0.1
+        }]
+    };
+    new Chart(ctx, {
+        type: 'line',
+        data: data,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#fff'
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#fff'
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#fff'
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
