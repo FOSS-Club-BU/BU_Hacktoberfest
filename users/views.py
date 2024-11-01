@@ -1,23 +1,147 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
-from django.db.models import Count, Prefetch, Max, Q, Min
+from django.db.models import Count, Prefetch, Max, Q, Min, Avg, Sum
 from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth.decorators import login_required
-from .models import User
-from .models import Repository, PullRequest, Issue, Commit
-from .tasks import update_user_contributions, update_user_contributions, update_all_user_contributions
+from .models import User, Repository, PullRequest, Issue, Commit
+from .models import User, Repository, PullRequest, HacktoberfestStats, DailyStats, TopContributor, TopRepository, StarredRepository
+from .tasks import update_user_contributions, update_all_user_contributions
 import os
+from django.db.models.functions import TruncDate
 from django.views.decorators.csrf import csrf_exempt
+import requests
+from django.utils import timezone
+from datetime import timedelta
 
-# Create your views here.
+def update_starred_repositories():
+    temp_l=[]
+    for pr in PullRequest.objects.filter(is_competition_repo=True, state='merged'):
+        repo_url = pr.url.split('/pull')[0]
+        print(repo_url)
+        try:
+            if repo_url in temp_l:
+                continue
+            response = requests.get(
+                f"https://api.github.com/repos/{repo_url.replace('https://github.com/','')}", 
+                headers={
+                    'Authorization': f"token {os.getenv('GITHUB_API_TOKEN')}",
+                    'Accept': 'application/vnd.github.v3+json'
+                    }
+            )
+            print(repo_url + " " + str(response.status_code))
+            if response.status_code == 200:
+                repo_data = response.json()
+                print(repo_data['stargazers_count'])
+                if repo_data['stargazers_count'] >= 200:
+                    StarredRepository.objects.update_or_create(
+                        url=repo_url,
+                        defaults={
+                            'name': repo_data['name'],
+                            'full_name': repo_data['full_name'],
+                            'stars': repo_data['stargazers_count'],
+                            'stars_text': f"{repo_data['stargazers_count']/1000:.1f}k"
+                        }
+                    )
+            temp_l.append(repo_url)
+        except Exception as e:
+            print(f"Error fetching repo data: {e}")
 
 def github_required(request):
     print(request.user.socialaccount_set)
 
+def event_ended_view(request):
+    return render(request, 'event_ended.html')
+
+def generate_stats():
+    stats = HacktoberfestStats.objects.create(
+        total_participants=User.objects.count(),
+        total_prs=PullRequest.objects.count(),
+        total_merged_prs=PullRequest.objects.filter(state='merged').count(),
+        total_repositories=Repository.objects.count(),
+        average_points=User.objects.aggregate(avg_points=Avg('points'))['avg_points'] or 0,
+        completion_rate=PullRequest.objects.filter(state='merged').count() / PullRequest.objects.count() * 100 if PullRequest.objects.count() > 0 else 0
+    )
+
+    # Top contributors
+    top_users = User.objects.annotate(
+        merged_prs=Count('pull_requests', filter=Q(pull_requests__state='merged'))
+    ).order_by('-points')[:10]
+
+    for rank, user in enumerate(top_users, 1):
+        TopContributor.objects.create(
+            stats=stats,
+            user=user,
+            points=user.points,
+            merged_prs=user.merged_prs,
+            rank=rank
+        )
+
+    # Repository stats
+    hacktoberfest_repos = Repository.objects.annotate(
+        total_prs=Count('pull_requests'),
+        merged_prs=Count('pull_requests', filter=Q(pull_requests__state='merged')),
+        unique_contributors=Count('pull_requests__user', distinct=True)
+    )
+
+
+    for repo in hacktoberfest_repos:
+        TopRepository.objects.create(
+            stats=stats,
+            repository=repo,
+            total_prs=repo.total_prs,
+            merged_prs=repo.merged_prs,
+            unique_contributors=repo.unique_contributors
+        )
+
+    # Update starred repositories
+    update_starred_repositories()
+
+    # Daily stats
+    daily_prs = PullRequest.objects.annotate(
+        date=TruncDate('created_at')
+    ).values('date').annotate(
+        pr_count=Count('id'),
+        active_users=Count('user', distinct=True),
+        points_awarded=Sum('points')
+    ).order_by('date')
+
+    for day in daily_prs:
+        DailyStats.objects.create(**day)
+
+    return stats
+
+def stats_view(request):
+    stats = HacktoberfestStats.objects.last()
+    # stats = generate_stats()
+    if not stats:
+        stats = generate_stats()
+
+    last_updated = StarredRepository.objects.aggregate(last_update=Max('last_updated'))['last_update']
+    if not last_updated:
+        update_starred_repositories()
+
+    hacktoberfest_repos = Repository.objects.filter(is_active=True).annotate(
+        total_prs=Count('pull_requests'),
+        merged_prs=Count('pull_requests', filter=Q(pull_requests__state='merged')),
+        unique_contributors=Count('pull_requests__user', distinct=True)
+    ).order_by('-merged_prs')
+
+    # Get starred repositories from database
+    starred_repos = StarredRepository.objects.all()
+
+    daily_stats = DailyStats.objects.all().order_by('date')
+    top_contributors = TopContributor.objects.filter(stats=stats).order_by('rank')
+
+    return render(request, 'stats.html', {
+        'stats': stats,
+        'daily_stats': daily_stats,
+        'top_contributors': top_contributors,
+        'hacktoberfest_repos': hacktoberfest_repos,
+        'starred_repos': starred_repos
+    })
 
 @login_required
 def profile(request):
-    github_required(request)
     user = request.user
     no_of_prs = PullRequest.objects.filter(user=user).count()
     no_of_issues = Issue.objects.filter(user=user).count()
@@ -29,17 +153,6 @@ def profile(request):
         'no_of_commits': no_of_commits
     }
     return JsonResponse(context)
-
-# @login_required
-# def update_user_contributions_view(request):
-#     user = request.user
-#     update_user_contributions(user)
-#     return JsonResponse({'status': 'success'})
-
-# @login_required
-# def update_all_user_contributions_view(request):
-#     update_all_user_contributions()
-#     return JsonResponse({'status': 'success'})
 
 @login_required
 def profile_view(request):
@@ -69,21 +182,11 @@ def profile_view(request):
     }
     return render(request, 'users/profile.html', context)
 
-
 @login_required
 def welcome_view(request):
     if request.user.socialaccount_set.filter(provider='github').exists():
         return redirect('profile')
     return render(request, 'welcome.html')
-
-# @login_required
-# def pr_detail_view(request, id):
-#     pr = get_object_or_404(PullRequest, id=id, user=request.user)
-#     context = {
-#         'pr': pr
-#     }
-#     return render(request, 'users/pr_detail.html', context)
-
 
 LEADERBOARD_REVEALED = os.getenv('LEADERBOARD_REVEALED', False)
 
@@ -126,25 +229,23 @@ def leaderboard_api_view(request):
     else:
         return JsonResponse({'message': 'Leaderboard not available yet'}, status=403)
 
-
 @csrf_exempt
 def update_all(request):
     if request.POST.get('API_KEY') != os.getenv('API_KEY'):
         return JsonResponse({'status': 'error', 'message': 'Invalid secret key'})
     update_all_user_contributions()
+    update_starred_repositories()
     return JsonResponse({'status': 'success'})
-
 
 def redirect_view(request):
     return redirect('profile')
 
 def repositories_view(request):
-    repositories = Repository.objects.filter(is_active=True)  # Fetch active repositories
+    repositories = Repository.objects.filter(is_active=True)
     context = {
         'repositories': repositories
     }
     return render(request, 'repositories.html', context)
-
 
 def public_profile_view(request, username):
     user = get_object_or_404(User, username=username)

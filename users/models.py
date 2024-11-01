@@ -1,7 +1,67 @@
-# users/models.py
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from allauth.socialaccount.models import SocialAccount
+
+class HacktoberfestStats(models.Model):
+    generated_at = models.DateTimeField(auto_now_add=True)
+    total_participants = models.IntegerField()
+    total_prs = models.IntegerField()
+    total_merged_prs = models.IntegerField()
+    total_repositories = models.IntegerField()
+    average_points = models.FloatField()
+    completion_rate = models.FloatField()
+    
+    class Meta:
+        verbose_name = 'Hacktoberfest Statistics'
+        verbose_name_plural = 'Hacktoberfest Statistics'
+
+class StarredRepository(models.Model):
+    name = models.CharField(max_length=255)
+    full_name = models.CharField(max_length=255)
+    url = models.URLField()
+    stars = models.IntegerField()
+    stars_text = models.CharField(max_length=20, default='0')
+    last_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Starred Repository'
+        verbose_name_plural = 'Starred Repositories'
+        ordering = ['-stars']
+
+    def __str__(self):
+        return f"{self.full_name} ({self.stars} stars)"
+
+    @property
+    def total_prs(self):
+        return PullRequest.objects.filter(url__startswith=self.url).count()
+
+    @property
+    def merged_prs(self):
+        return PullRequest.objects.filter(url__startswith=self.url, state='merged').count()
+
+class DailyStats(models.Model):
+    date = models.DateField()
+    pr_count = models.IntegerField()
+    active_users = models.IntegerField()
+    points_awarded = models.IntegerField()
+
+    class Meta:
+        verbose_name = 'Daily Statistics'
+        verbose_name_plural = 'Daily Statistics'
+
+class TopContributor(models.Model):
+    stats = models.ForeignKey(HacktoberfestStats, on_delete=models.CASCADE)
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    points = models.IntegerField()
+    merged_prs = models.IntegerField()
+    rank = models.IntegerField()
+
+class TopRepository(models.Model):
+    stats = models.ForeignKey(HacktoberfestStats, on_delete=models.CASCADE)
+    repository = models.ForeignKey('Repository', on_delete=models.CASCADE)
+    total_prs = models.IntegerField()
+    merged_prs = models.IntegerField()
+    unique_contributors = models.IntegerField()
 
 class User(AbstractUser):
     github_username = models.CharField(max_length=39, blank=True)
@@ -32,14 +92,11 @@ class User(AbstractUser):
         return self.pull_requests.filter(state='merged').count()
     
     def get_profile_username(self):
-        # get github username from social account
         social_account = SocialAccount.objects.get(user=self, provider='github')
         return social_account.extra_data.get('login')
     
-    # change string representation of the model
     def __str__(self):
         return self.first_name if self.first_name else self.username
-
 
 class Repository(models.Model):
     DIFFICULTY_CHOICES = [
@@ -61,19 +118,16 @@ class Repository(models.Model):
     def __str__(self):
         return self.name
     
-    # Return the tech stack as a list
     def get_tech_stack(self):
         return [tech.strip() for tech in self.tech_stack.split(',') if tech.strip()]
 
-    # plural name for admin panel
     class Meta:
         verbose_name_plural = 'Repositories'
-
 
 class PullRequest(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pull_requests')
-    repository = models.ForeignKey(Repository, on_delete=models.CASCADE, related_name='pull_requests', null=True, blank=True)  # Optional for global PRs
+    repository = models.ForeignKey(Repository, on_delete=models.CASCADE, related_name='pull_requests', null=True, blank=True)
     pr_id = models.IntegerField()
     title = models.CharField(max_length=255)
     url = models.URLField()
@@ -85,14 +139,12 @@ class PullRequest(models.Model):
     additions = models.IntegerField()
     deletions = models.IntegerField()
     changed_files = models.IntegerField()
-    is_competition_repo = models.BooleanField(default=False)  # Flag for competition-specific PRs
-
-
+    is_competition_repo = models.BooleanField(default=False)
 
 class Issue(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='issues')
-    repository = models.ForeignKey(Repository, on_delete=models.CASCADE, related_name='issues', null=True, blank=True)  # Optional for global issues
+    repository = models.ForeignKey(Repository, on_delete=models.CASCADE, related_name='issues', null=True, blank=True)
     issue_id = models.IntegerField()
     title = models.CharField(max_length=255)
     url = models.URLField()
@@ -100,7 +152,7 @@ class Issue(models.Model):
     created_at = models.DateTimeField()
     closed_at = models.DateTimeField(null=True, blank=True)
     comments = models.IntegerField()
-    is_competition_repo = models.BooleanField(default=False)  # Flag for competition-specific issues
+    is_competition_repo = models.BooleanField(default=False)
 
 class Commit(models.Model):
     id = models.AutoField(primary_key=True)
@@ -112,7 +164,6 @@ class Commit(models.Model):
     additions = models.IntegerField()
     deletions = models.IntegerField()
     repository_name = models.CharField(max_length=100)
-
 
 class BlackListedRepository(models.Model):
     name = models.CharField(max_length=100)
