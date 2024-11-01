@@ -12,6 +12,7 @@ class HacktoberfestStats(models.Model):
     total_repositories = models.IntegerField()
     average_points = models.FloatField()
     completion_rate = models.FloatField()
+    most_active_day = models.DateField(null=True)
     
     class Meta:
         verbose_name = 'Hacktoberfest Statistics'
@@ -36,7 +37,6 @@ class StarredRepository(models.Model):
         return f"{self.full_name} ({self.stars} stars)"
 
     def update_pr_counts(self):
-        # Get all PRs for this repository
         prs = PullRequest.objects.filter(url__startswith=self.url)
         self.total_prs_count = prs.count()
         self.merged_prs_count = prs.filter(state='merged').count()
