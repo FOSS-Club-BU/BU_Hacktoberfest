@@ -10,8 +10,6 @@ import os
 from django.db.models.functions import TruncDate
 from django.views.decorators.csrf import csrf_exempt
 import requests
-from django.utils import timezone
-from datetime import timedelta
 
 def update_starred_repositories():
     temp_l = []
@@ -54,16 +52,12 @@ def event_ended_view(request):
     return render(request, 'event_ended.html')
 
 def assign_pull_request_to_top_repo(pr):
-    # top_repos = TopRepository.objects.all()
-    # pr_state = pr.state
-    print(pr.url)
     repository = Repository.objects.filter(url__startswith=pr.url.split('/pull')[0]).first()
     pr.repository = repository
     pr.save()
 
-
-
 def generate_stats():
+    # Calculate basic stats
     stats = HacktoberfestStats.objects.create(
         total_participants=User.objects.count(),
         total_prs=PullRequest.objects.count(),
@@ -74,6 +68,12 @@ def generate_stats():
         average_points=User.objects.aggregate(avg_points=Avg('points'))['avg_points'] or 0,
         completion_rate=PullRequest.objects.filter(state='merged').count() / PullRequest.objects.count() * 100 if PullRequest.objects.count() > 0 else 0
     )
+
+    # Calculate most active day
+    most_active_day = DailyStats.objects.order_by('-pr_count').first()
+    if most_active_day:
+        stats.most_active_day = most_active_day.date
+        stats.save()
 
     # Top contributors
     top_users = User.objects.annotate(
@@ -96,7 +96,6 @@ def generate_stats():
         unique_contributors=Count('pull_requests__user', distinct=True)
     ).order_by('-merged_prs')
 
-
     for repo in hacktoberfest_repos:
         TopRepository.objects.create(
             stats=stats,
@@ -105,9 +104,6 @@ def generate_stats():
             merged_prs=repo.merged_prs,
             unique_contributors=repo.unique_contributors
         )
-
-    # Update starred repositories
-    # update_starred_repositories()
 
     # Daily stats
     daily_prs = PullRequest.objects.annotate(
@@ -124,11 +120,10 @@ def generate_stats():
     return stats
 
 def stats_view(request):
-    # stats = HacktoberfestStats.objects.last()
-    # if not stats:
-    stats = generate_stats()
+    stats = HacktoberfestStats.objects.last()
+    if not stats:
+        stats = generate_stats()
 
-    # last_updated = StarredRepository.objects.aggregate(last_update=Max('last_updated'))['last_update']
     hacktoberfest_repos = Repository.objects.filter(is_active=True).annotate(
         total_prs=Count('pull_requests', distinct=True),
         merged_prs=Count('pull_requests', filter=Q(pull_requests__state='merged'), distinct=True),
