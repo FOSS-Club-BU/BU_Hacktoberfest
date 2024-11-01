@@ -67,7 +67,9 @@ def generate_stats():
     stats = HacktoberfestStats.objects.create(
         total_participants=User.objects.count(),
         total_prs=PullRequest.objects.count(),
+        total_prs_in_competition_repos=PullRequest.objects.filter(is_competition_repo=True).count(),
         total_merged_prs=PullRequest.objects.filter(state='merged').count(),
+        total_merged_prs_in_competition_repos=PullRequest.objects.filter(state='merged', is_competition_repo=True).count(),
         total_repositories=Repository.objects.count(),
         average_points=User.objects.aggregate(avg_points=Avg('points'))['avg_points'] or 0,
         completion_rate=PullRequest.objects.filter(state='merged').count() / PullRequest.objects.count() * 100 if PullRequest.objects.count() > 0 else 0
@@ -134,7 +136,7 @@ def stats_view(request):
     ).order_by('-merged_prs')
 
     starred_repos = StarredRepository.objects.all().order_by('-stars')
-    daily_stats = DailyStats.objects.all().order_by('date')
+    daily_stats = DailyStats.objects.all().distinct('date').order_by('date')
     top_contributors = TopContributor.objects.filter(stats=stats).order_by('rank')
 
     return render(request, 'stats.html', {
